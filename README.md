@@ -1,4 +1,4 @@
-# Health Counseling System - C# Microservices
+# FPT University Admissions Counseling System - C# Microservices
 
 ![Microservices](https://img.shields.io/badge/Architecture-Microservices-blue)
 ![.NET](https://img.shields.io/badge/.NET-9.0-purple)
@@ -7,19 +7,19 @@
 ![Docker](https://img.shields.io/badge/Container-Docker-blue)
 ![RabbitMQ](https://img.shields.io/badge/MessageBroker-RabbitMQ-orange)
 
-A health counseling system built with microservices architecture using C# and .NET. The system allows users to schedule consultations, make payments, manage medical records, and more.
+A FPT University admissions counseling system built with microservices architecture using C# and .NET. The system allows prospective students to schedule consultations with admission counselors, submit application documents, make program-related payments, and track their application process.
 
 ## System Architecture
 
 The system is divided into several independent microservices:
 
 - **AuthService**: User authentication and authorization using OpenIddict
-- **AppointmentService**: Consultation appointment management
-- **PaymentService**: Payment processing
-- **DocumentService**: Document and health record management
-- **SystemFeedbackService**: Ratings and feedback management
-- **ScheduleService**: Work schedule management
-- **RequestTicketService**: Support request management
+- **AppointmentService**: Consultation appointment management with counselors
+- **PaymentService**: Application fee and program payment processing
+- **DocumentService**: Application documents and record management
+- **SystemFeedbackService**: Counseling session ratings and feedback management
+- **ScheduleService**: Counselor work schedule management
+- **RequestTicketService**: Admission inquiry and support request management
 
 ### Reverse Proxy
 
@@ -58,6 +58,7 @@ Each microservice is organized according to Clean Architecture pattern:
 - MongoDB
 - PostgreSQL
 - RabbitMQ
+- Yarp
 
 ## Installation and Execution
 
