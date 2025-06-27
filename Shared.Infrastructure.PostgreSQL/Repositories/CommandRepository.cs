@@ -8,9 +8,7 @@ namespace Shared.Infrastructure.PostgreSQL.Repositories;
 public class CommandRepository<TEntity>(AppDbContext context) : ICommandRepository<TEntity> where TEntity : class
 {
     protected readonly AppDbContext Context = context;
-
     private DbSet<TEntity> DbSet => Context.Set<TEntity>();
-
     
     /// <summary>
     /// Find records/ record
@@ -51,6 +49,10 @@ public class CommandRepository<TEntity>(AppDbContext context) : ICommandReposito
         await Context.AddAsync(entity);
     }
 
+    /// <summary>
+    /// Add a range of entities
+    /// </summary>
+    /// <param name="entities"></param>
     public async Task AddRangeAsync(IEnumerable<TEntity> entities)
     {
        await Context.AddRangeAsync(entities);
