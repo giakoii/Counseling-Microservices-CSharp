@@ -1,0 +1,48 @@
+﻿services:
+  authservice:
+    image: authservice
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+
+  scheduleservice:
+    image: scheduleservice
+    build:
+      context: .
+      dockerfile: ScheduleService/Dockerfile
+
+  requestticketservice:
+    image: requestticketservice
+    build:
+      context: .
+      dockerfile: RequestTicketService/Dockerfile
+
+  aichatservice:
+    image: aichatservice
+    build:
+      context: .
+      dockerfile: AIChatService/Dockerfile
+
+  documentservice:
+    image: documentservice
+    build:
+      context: .
+      dockerfile: DocumentService/Dockerfile
+
+  appointmentservice:
+    image: appointmentservice
+    build:
+      context: .
+      dockerfile: AppointmentService/Dockerfile
+
+  paymentservice:
+    image: paymentservice
+    build:
+      context: .
+      dockerfile: PaymentService/Dockerfile
+
+  systemfeedbackservice:
+    image: systemfeedbackservice
+    build:
+      context: .
+      dockerfile: SystemFeedbackService/Dockerfile
