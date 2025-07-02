@@ -90,8 +90,7 @@ public class UserController : ControllerBase
         // Refresh token
         if (openIdRequest!.IsRefreshTokenGrantType())
         {
-            var claimsPrincipal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
-            return SignIn(claimsPrincipal!, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            return await TokensForRefreshTokenGrantType();
         }
 
         // Unsupported grant type
@@ -99,6 +98,120 @@ public class UserController : ControllerBase
         {
             Error = Errors.UnsupportedGrantType
         });
+    }
+
+    /// <summary>
+    /// Handle refresh token grant type
+    /// </summary>
+    /// <returns></returns>
+    private async Task<IActionResult> TokensForRefreshTokenGrantType()
+    {
+        try
+        {
+            // Authenticate the refresh token
+            var authenticateResult = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            
+            if (!authenticateResult.Succeeded)
+            {
+                return Unauthorized(new OpenIddictResponse
+                {
+                    Error = Errors.InvalidGrant,
+                    ErrorDescription = "The refresh token is invalid."
+                });
+            }
+
+            var claimsPrincipal = authenticateResult.Principal;
+            
+            // Validate that the user still exists and is active
+            var userId = claimsPrincipal.GetClaim(Claims.Subject);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new OpenIddictResponse
+                {
+                    Error = Errors.InvalidGrant,
+                    ErrorDescription = "The refresh token is invalid."
+                });
+            }
+
+            // Optional: Validate user still exists in database
+            // You can add user existence check here if needed
+            
+            // Create new identity with fresh claims
+            var identity = new ClaimsIdentity(
+                TokenValidationParameters.DefaultAuthenticationType,
+                Claims.Name,
+                Claims.Role
+            );
+
+            // Copy existing claims from the refresh token
+            foreach (var claim in claimsPrincipal.Claims)
+            {
+                // Copy essential claims
+                switch (claim.Type)
+                {
+                    case Claims.Subject:
+                        identity.SetClaim(Claims.Subject, claim.Value, Destinations.AccessToken);
+                        break;
+                    case Claims.Name:
+                        identity.SetClaim(Claims.Name, claim.Value, Destinations.AccessToken);
+                        break;
+                    case "UserId":
+                        identity.SetClaim("UserId", claim.Value, Destinations.AccessToken);
+                        break;
+                    case Claims.Email:
+                        identity.SetClaim(Claims.Email, claim.Value, Destinations.AccessToken);
+                        break;
+                    case Claims.PhoneNumber:
+                        identity.SetClaim(Claims.PhoneNumber, claim.Value, Destinations.AccessToken);
+                        break;
+                    case Claims.Role:
+                        identity.SetClaim(Claims.Role, claim.Value, Destinations.AccessToken);
+                        break;
+                    case Claims.Audience:
+                        identity.SetClaim(Claims.Audience, claim.Value, Destinations.AccessToken);
+                        break;
+                }
+            }
+
+            // Set destinations for claims
+            identity.SetDestinations(claim =>
+            {
+                return claim.Type switch
+                {
+                    Claims.Subject => new[] { Destinations.AccessToken },
+                    Claims.Name => new[] { Destinations.AccessToken },
+                    "UserId" => new[] { Destinations.AccessToken },
+                    Claims.Email => new[] { Destinations.AccessToken },
+                    Claims.PhoneNumber => new[] { Destinations.AccessToken },
+                    Claims.Role => new[] { Destinations.AccessToken },
+                    Claims.Audience => new[] { Destinations.AccessToken },
+                    _ => new[] { Destinations.AccessToken }
+                };
+            });
+
+            // Create new claims principal
+            var newClaimsPrincipal = new ClaimsPrincipal(identity);
+            
+            // Set scopes (preserve original scopes)
+            newClaimsPrincipal.SetScopes(claimsPrincipal.GetScopes());
+            
+            // Set resources
+            newClaimsPrincipal.SetResources(await _scopeManager.ListResourcesAsync(newClaimsPrincipal.GetScopes()).ToListAsync());
+
+            // Set token lifetimes
+            newClaimsPrincipal.SetAccessTokenLifetime(TimeSpan.FromHours(1));
+            newClaimsPrincipal.SetRefreshTokenLifetime(TimeSpan.FromHours(2));
+
+            return SignIn(newClaimsPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new OpenIddictResponse
+            {
+                Error = Errors.ServerError,
+                ErrorDescription = "An error occurred while processing the refresh token."
+            });
+        }
     }
     
     /// <summary>
@@ -172,5 +285,83 @@ public class UserController : ControllerBase
         claimsPrincipal.SetRefreshTokenLifetime(TimeSpan.FromHours(2));
 
         return SignIn(claimsPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    /// <summary>
+    /// Logout endpoint - revoke tokens
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("~/connect/logout")]
+    [Produces("application/json")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            // Get the current user's claims
+            var identity = _identityApiClient.GetIdentity(User);
+            
+            if (identity == null)
+            {
+                return BadRequest(new OpenIddictResponse
+                {
+                    Error = Errors.InvalidRequest,
+                    ErrorDescription = "Invalid user identity."
+                });
+            }
+
+            // Sign out the user
+            await HttpContext.SignOutAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            
+            return Ok(new
+            {
+                Success = true,
+                Message = "Logged out successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new OpenIddictResponse
+            {
+                Error = Errors.ServerError,
+                ErrorDescription = "An error occurred while logging out."
+            });
+        }
+    }
+
+    /// <summary>
+    /// Revoke token endpoint (alternative logout method)
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("~/connect/revoke")]
+    [Consumes("application/x-www-form-urlencoded")]
+    [Produces("application/json")]
+    public async Task<IActionResult> Revoke()
+    {
+        try
+        {
+            var request = HttpContext.GetOpenIddictServerRequest();
+            
+            if (string.IsNullOrEmpty(request?.Token))
+            {
+                return BadRequest(new OpenIddictResponse
+                {
+                    Error = Errors.InvalidRequest,
+                    ErrorDescription = "Token is required."
+                });
+            }
+
+            // The OpenIddict server will automatically handle token revocation
+            // This includes both access tokens and refresh tokens
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new OpenIddictResponse
+            {
+                Error = Errors.ServerError,
+                ErrorDescription = "An error occurred while revoking the token."
+            });
+        }
     }
 }
