@@ -21,16 +21,19 @@ namespace AuthService.API.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IOpenIddictScopeManager _scopeManager;
+    private readonly IOpenIddictTokenManager _tokenManager;
     private readonly IMediator _mediator;
     private readonly IIdentityApiClient _identityApiClient;
 
-    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager, IIdentityApiClient identityApiClient)
+    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager,
+        IOpenIddictTokenManager tokenManager, IIdentityApiClient identityApiClient)
     {
         _mediator = mediator;
         _scopeManager = scopeManager;
+        _tokenManager = tokenManager;
         _identityApiClient = identityApiClient;
     }
-    
+
     [HttpPost]
     [Route("[action]")]
     public UserCreateResponse CreateUser([FromBody] InsertUserCommand request)
@@ -57,18 +60,18 @@ public class UserController : ControllerBase
     public SelectUserProfileResponse SelectUserProfile([FromQuery] SelectUserProfileQuery request)
     {
         var identity = _identityApiClient.GetIdentity(User);
-        
+
         if (identity == null)
         {
             var response = new SelectUserProfileResponse { Success = false };
             response.SetMessage(MessageId.E11001);
             return response;
         }
-        
-        var result = _mediator.Send(request with {UserId = Guid.Parse(identity.UserId)}).Result;
+
+        var result = _mediator.Send(request with { UserId = Guid.Parse(identity.UserId) }).Result;
         return result;
     }
-    
+
     /// <summary>
     /// Exchange token
     /// </summary>
@@ -77,7 +80,7 @@ public class UserController : ControllerBase
     [HttpPost("~/connect/token")]
     [Consumes("application/x-www-form-urlencoded")]
     [Produces("application/json")]
-    public async Task<IActionResult> Exchange([FromForm]LoginUserCommand request)
+    public async Task<IActionResult> Exchange([FromForm] LoginUserCommand request)
     {
         var openIdRequest = HttpContext.GetOpenIddictServerRequest();
 
@@ -109,8 +112,9 @@ public class UserController : ControllerBase
         try
         {
             // Authenticate the refresh token
-            var authenticateResult = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            
+            var authenticateResult =
+                await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
             if (!authenticateResult.Succeeded)
             {
                 return Unauthorized(new OpenIddictResponse
@@ -121,7 +125,7 @@ public class UserController : ControllerBase
             }
 
             var claimsPrincipal = authenticateResult.Principal;
-            
+
             // Validate that the user still exists and is active
             var userId = claimsPrincipal.GetClaim(Claims.Subject);
             if (string.IsNullOrEmpty(userId))
@@ -133,9 +137,6 @@ public class UserController : ControllerBase
                 });
             }
 
-            // Optional: Validate user still exists in database
-            // You can add user existence check here if needed
-            
             // Create new identity with fresh claims
             var identity = new ClaimsIdentity(
                 TokenValidationParameters.DefaultAuthenticationType,
@@ -191,12 +192,13 @@ public class UserController : ControllerBase
 
             // Create new claims principal
             var newClaimsPrincipal = new ClaimsPrincipal(identity);
-            
+
             // Set scopes (preserve original scopes)
             newClaimsPrincipal.SetScopes(claimsPrincipal.GetScopes());
-            
+
             // Set resources
-            newClaimsPrincipal.SetResources(await _scopeManager.ListResourcesAsync(newClaimsPrincipal.GetScopes()).ToListAsync());
+            newClaimsPrincipal.SetResources(await _scopeManager.ListResourcesAsync(newClaimsPrincipal.GetScopes())
+                .ToListAsync());
 
             // Set token lifetimes
             newClaimsPrincipal.SetAccessTokenLifetime(TimeSpan.FromHours(1));
@@ -213,7 +215,7 @@ public class UserController : ControllerBase
             });
         }
     }
-    
+
     /// <summary>
     /// Generate tokens for the user
     /// </summary>
@@ -288,7 +290,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Logout endpoint - revoke tokens
+    /// Logout endpoint - revoke tokens properly
     /// </summary>
     /// <returns></returns>
     [HttpPost("~/connect/logout")]
@@ -300,7 +302,7 @@ public class UserController : ControllerBase
         {
             // Get the current user's claims
             var identity = _identityApiClient.GetIdentity(User);
-            
+
             if (identity == null)
             {
                 return BadRequest(new OpenIddictResponse
@@ -310,13 +312,36 @@ public class UserController : ControllerBase
                 });
             }
 
-            // Sign out the user
+            // Get the current access token from the Authorization header
+            var accessToken = Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                // Find and revoke the access token
+                var token = await _tokenManager.FindByReferenceIdAsync(accessToken);
+                if (token != null)
+                {
+                    await _tokenManager.TryRevokeAsync(token);
+                }
+            }
+
+            // Revoke all active tokens for this user
+            var userId = identity.UserId;
+            await foreach (var token in _tokenManager.FindBySubjectAsync(userId))
+            {
+                // Revoke both access tokens and refresh tokens
+                await _tokenManager.TryRevokeAsync(token);
+            }
+
+            // Sign out the user from the current context
             await HttpContext.SignOutAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            
+
+            var request = HttpContext.GetOpenIddictServerRequest();
+
             return Ok(new
             {
                 Success = true,
-                Message = "Logged out successfully"
+                Message = "Logged out successfully. All tokens have been revoked."
             });
         }
         catch (Exception ex)
@@ -325,42 +350,6 @@ public class UserController : ControllerBase
             {
                 Error = Errors.ServerError,
                 ErrorDescription = "An error occurred while logging out."
-            });
-        }
-    }
-
-    /// <summary>
-    /// Revoke token endpoint (alternative logout method)
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("~/connect/revoke")]
-    [Consumes("application/x-www-form-urlencoded")]
-    [Produces("application/json")]
-    public async Task<IActionResult> Revoke()
-    {
-        try
-        {
-            var request = HttpContext.GetOpenIddictServerRequest();
-            
-            if (string.IsNullOrEmpty(request?.Token))
-            {
-                return BadRequest(new OpenIddictResponse
-                {
-                    Error = Errors.InvalidRequest,
-                    ErrorDescription = "Token is required."
-                });
-            }
-
-            // The OpenIddict server will automatically handle token revocation
-            // This includes both access tokens and refresh tokens
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new OpenIddictResponse
-            {
-                Error = Errors.ServerError,
-                ErrorDescription = "An error occurred while revoking the token."
             });
         }
     }
