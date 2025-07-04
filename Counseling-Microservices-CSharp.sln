@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentService.Domain",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentService.Application", "AppointmentService.Application\AppointmentService.Application.csproj", "{7744D143-6943-40CD-B793-55C103BE2CE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentService.Infractructure", "AppointmentService.Infractructure\AppointmentService.Infractructure.csproj", "{808D1858-E064-4891-91ED-BB864C6DBC44}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentService.Infrastructure", "AppointmentService.Infrastructure\AppointmentService.Infrastructure.csproj", "{808D1858-E064-4891-91ED-BB864C6DBC44}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ScheduleService", "ScheduleService", "{F6467FDE-03A9-4561-9CF5-F16A7F23A1BF}"
 EndProject
