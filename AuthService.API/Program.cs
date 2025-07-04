@@ -1,10 +1,11 @@
 using System.Net;
 using AuthService.API;
-using AuthService.API.Utils.Const;
 using AuthService.Application.Users.Commands;
 using AuthService.Domain.WriteModels;
 using AuthService.Infrastructure;
 using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
+using AuthService.API.Utils;
+using AuthService.API.Utils.Const;
 using Common.SystemClient;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Get the connection string from environment variables
-var postgreConnectionString = Environment.GetEnvironmentVariable(ConstEnv.ConnectionString);
+var postgreConnectionString = Environment.GetEnvironmentVariable(ConstEnv.AuthServiceDB);
 var mongoConnectionString = Environment.GetEnvironmentVariable(ConstEnv.MonGoConnectionString);
 
 

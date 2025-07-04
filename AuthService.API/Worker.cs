@@ -1,7 +1,8 @@
-using AuthService.API.Utils.Const;
 using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
+using Common.Utils.Const;
+using DotNetEnv;
 using OpenIddict.Abstractions;
-using Shared.Infrastructure.PostgreSQL.Context;
+using ConstEnv = AuthService.API.Utils.Const.ConstEnv;
 
 namespace AuthService.API;
 
@@ -34,7 +35,7 @@ public class Worker : IHostedService
         async Task CreateApplicationsAsync()
         {
             // Load environment variables from .env file
-            DotNetEnv.Env.Load();
+            Env.Load();
             
             var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
