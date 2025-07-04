@@ -112,8 +112,7 @@ public class UserController : ControllerBase
         try
         {
             // Authenticate the refresh token
-            var authenticateResult =
-                await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            var authenticateResult = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
             if (!authenticateResult.Succeeded)
             {

@@ -1,4 +1,5 @@
 using AuthService.Domain.WriteModels;
+using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.PostgreSQL.Context;
 
@@ -12,6 +13,21 @@ public class AuthServiceContext : AppDbContext
     
     public AuthServiceContext(DbContextOptions<AuthServiceContext> options)
         : base(options) {}
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            DotNetEnv.Env.Load(); 
+
+            var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AuthServiceDB);
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("Missing CONNECTION_STRING environment variable");
+
+            optionsBuilder.UseNpgsql(connectionString);
+        }
+    }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
