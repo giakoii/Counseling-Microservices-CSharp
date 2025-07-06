@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 namespace Shared.Application.Repositories;
 
-public interface INoSqlQueryRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
+public interface INoSqlQueryRepository<TEntity> where TEntity : class
 {
     /// <summary>
     /// Find entities by predicate as asynchronous
