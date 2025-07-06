@@ -20,6 +20,11 @@ Thumbs.db
 .env
 **/.env
 
+appsettings.json
+appsettings.*.json
+**/appsettings.json
+**/appsettings.*.json
+
 # Bỏ qua các file user settings
 *.user
 *.userosscache

@@ -1,9 +1,12 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Common.Utils.Const;
 
 public partial class Messages
 {
+    private static string? _csvContent;
+    
     /// <summary>
     /// Returns the message associated with the message ID.
     /// </summary>
@@ -11,39 +14,67 @@ public partial class Messages
     /// <param name="args">args</param>
     public static string GetMessage(string messageId, params string[] args)
     {
-        //If there is no message that matches the CSV, the following will be returned.
         var message = "No matching message.";
-
-        var csvPath = Path.Combine(Directory.GetCurrentDirectory(), "Settings/ConstanstCSV/MessageId.csv");
-
-        if (!File.Exists(csvPath)) return $"{csvPath} not found.";
-
-        var reader = new StreamReader(File.OpenRead(csvPath));
-        int row = 0;
-        while (!reader.EndOfStream)
+        
+        try
         {
-            var line = reader.ReadLine();
-
-            //Skip the first line
-            if (row == 0) { row++; continue; }
-
-            string[] values = line.Split(',');
-            if (values[1] == messageId)
+            // Load CSV content from embedded resource
+            if (_csvContent == null)
             {
-                message = values[2];
-                //Replace the specified part even if {0} etc. are not set
-                for (int i = 0; i < args.Length; i++)
-                    message = message.Replace($"{{{i}}}", args[i]);
-
-                //Remove the remaining {0} etc.
-                message = Regex.Replace(message, @"\{[0-9]+\}", "");
-
-                //Convert \\n to \n
-                message = message.Replace("\\n", "\n");
-
-                break;
+                _csvContent = LoadCsvFromEmbeddedResource();
+            }
+            
+            if (string.IsNullOrEmpty(_csvContent))
+            {
+                return "MessageId.csv not found in embedded resources.";
+            }
+            
+            var lines = _csvContent.Split('\n');
+            
+            for (int i = 1; i < lines.Length; i++) // Skip header row
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line)) continue;
+                
+                string[] values = line.Split(',');
+                if (values.Length >= 3 && values[1] == messageId)
+                {
+                    message = values[2];
+                    
+                    // Replace placeholders with arguments
+                    for (int j = 0; j < args.Length; j++)
+                        message = message.Replace($"{{{j}}}", args[j]);
+                    
+                    // Remove remaining placeholders
+                    message = Regex.Replace(message, @"\{[0-9]+\}", "");
+                    
+                    // Convert \\n to \n
+                    message = message.Replace("\\n", "\n");
+                    
+                    break;
+                }
             }
         }
+        catch (Exception ex)
+        {
+            return $"Error reading message: {ex.Message}";
+        }
+        
         return message;
+    }
+    
+    private static string LoadCsvFromEmbeddedResource()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = "Common.Resources.MessageId.csv";
+        
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            return string.Empty;
+        }
+        
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 }

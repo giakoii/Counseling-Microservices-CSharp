@@ -1,11 +1,11 @@
-namespace BackEnd.Utils.Const;
+namespace Common.Utils.Const;
 
 public static class ConstantEnum
 {
     public enum Role
     {
-        Customer = 1,
-        Partner = 2,
+        Student = 1,
+        Consultant = 2,
         Admin = 3,	
     }
 }
