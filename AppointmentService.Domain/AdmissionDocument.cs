@@ -1,4 +1,7 @@
-﻿namespace AppointmentService.Domain;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AppointmentService.Infrastructure;
 
 public partial class AdmissionDocument
 {

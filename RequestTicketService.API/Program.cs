@@ -10,6 +10,7 @@ using OpenIddict.Validation.AspNetCore;
 using RequestTicketService.Infrastructure.Data.Contexts;
 
 var builder = WebApplication.CreateBuilder(args);
+
 // Load environment variables from .env file
 Env.Load();
 

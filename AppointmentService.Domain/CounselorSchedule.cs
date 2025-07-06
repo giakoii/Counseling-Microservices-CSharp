@@ -1,4 +1,7 @@
-﻿namespace AppointmentService.Domain;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AppointmentService.Infrastructure;
 
 public partial class CounselorSchedule
 {
@@ -6,11 +9,9 @@ public partial class CounselorSchedule
 
     public Guid CounselorId { get; set; }
 
-    public TimeOnly StartTime { get; set; }
-
-    public TimeOnly EndTime { get; set; }
-
     public short DayId { get; set; }
+
+    public int SlotId { get; set; }
 
     public short? StatusId { get; set; }
 
@@ -24,5 +25,9 @@ public partial class CounselorSchedule
 
     public string UpdatedBy { get; set; } = null!;
 
-    public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+    public virtual Weekday Day { get; set; } = null!;
+
+    public virtual TimeSlot Slot { get; set; } = null!;
+
+    public virtual WeekdayTimeSlot WeekdayTimeSlot { get; set; } = null!;
 }

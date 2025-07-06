@@ -1,4 +1,7 @@
-﻿namespace AppointmentService.Domain;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AppointmentService.Infrastructure;
 
 public partial class Appointment
 {
@@ -29,6 +32,4 @@ public partial class Appointment
     public string UpdatedBy { get; set; } = null!;
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-
-    public virtual CounselorSchedule Schedule { get; set; } = null!;
 }
