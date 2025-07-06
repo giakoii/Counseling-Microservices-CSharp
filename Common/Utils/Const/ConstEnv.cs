@@ -9,6 +9,8 @@ public class ConstEnv
     public const string AuthServiceDB = "AUTH_SERVICE_DB";
     
     public const string RequestTicketServiceDB = "REQUEST_TICKET_SERVICE_DB";
-
-    public const string MonGoConnectionString = "";
+    
+    public const string ChatServiceDB = "CHAT_SERVICE_DB";
+    
+    public const string FeedBackServiceDB = "FEEDBACK_SERVICE_DB";
 }

@@ -12,25 +12,26 @@ public class IdentityApiClient : IIdentityApiClient
         // Get id
         var id = identity?.FindFirst(OpenIddictConstants.Claims.Subject)?.Value;
         
-        // Get username
-        var userNm = identity.FindFirst("UserId")?.Value ?? string.Empty;
-        
         // Get email
-        var email = identity.FindFirst(OpenIddictConstants.Claims.Email)?.Value ?? string.Empty;
+        var email = identity!.FindFirst(OpenIddictConstants.Claims.Email)?.Value;
         
         // Get phone number
-        var phoneNumber = identity.FindFirst(OpenIddictConstants.Claims.PhoneNumber)?.Value ?? string.Empty;
+        var phoneNumber = identity.FindFirst(OpenIddictConstants.Claims.PhoneNumber)?.Value;
         
         // Get address
-        var address = identity.FindFirst(OpenIddictConstants.Claims.Address)?.Value ?? string.Empty;
+        var address = identity.FindFirst(OpenIddictConstants.Claims.Address)?.Value;
+        
+        // Get role name
+        var roleName = identity.FindFirst(OpenIddictConstants.Claims.Role)?.Value;
         
         // Create IdentityEntity
         var identityEntity = new IdentityEntity
         {
-            UserId = id,
-            Email = email,
-            PhoneNumber = phoneNumber,
-            Address = address
+            UserId = id!,
+            Email = email!,
+            PhoneNumber = phoneNumber!,
+            Address = address!,
+            RoleName = roleName!,
         };
         return identityEntity;
     }
