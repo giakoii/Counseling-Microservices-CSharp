@@ -8,13 +8,32 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
+        <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="Marten" Version="8.3.1" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+        <PackageReference Include="NLog" Version="5.3.4" />
+        <PackageReference Include="NLog.Config" Version="4.7.15" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.2.0" />
+        <PackageReference Include="NSwag.MSBuild" Version="14.2.0">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="OpenIddict.Abstractions" Version="6.0.0" />
+        <PackageReference Include="OpenIddict.AspNetCore" Version="6.0.0" />
+        <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="6.0.0" />
+        <PackageReference Include="OpenIddict.Validation.SystemNetHttp" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\RequestTicketService.Application\RequestTicketService.Application.csproj" />
+      <ProjectReference Include="..\RequestTicketService.Infrastructure\RequestTicketService.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

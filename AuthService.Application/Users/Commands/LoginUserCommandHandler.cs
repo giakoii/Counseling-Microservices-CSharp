@@ -1,4 +1,4 @@
-using AuthService.Domain.WriteModels;
+using AuthService.Domain;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
@@ -71,11 +71,11 @@ internal class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, Login
         _userRepository.Update(userExist);
         await _userRepository.SaveChangesAsync(userExist.Email!);
         
-        var role = await _roleRepository.Find(x => x.RoleId == userExist.RoleId).FirstOrDefaultAsync();
+        var role = await _roleRepository.Find(x => x.Id == userExist.RoleId).FirstOrDefaultAsync();
 
         var entityResponse = new LoginResponseEntity
         {
-            UserId = userExist.UserId,
+            UserId = userExist.Id,
             Email = userExist.Email!,
             PhoneNumber = userExist.PhoneNumber!,
             FullName = $"{userExist.FirstName} {userExist.LastName}",

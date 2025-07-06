@@ -1,6 +1,4 @@
-using AuthService.Domain.ReadModels;
-using AuthService.Domain.WriteModels;
-using BackEnd.Utils.Const;
+using AuthService.Domain;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
@@ -20,13 +18,11 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Use
 {
     private readonly ICommandRepository<User> _userRepository;
     private readonly ICommandRepository<Role> _roleRepository;
-    private readonly INoSqlQueryRepository<UserMongo> _userMongoRepository;
 
-    public InsertUserCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, INoSqlQueryRepository<UserMongo> userMongoRepository)
+    public InsertUserCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
-        _userMongoRepository = userMongoRepository;
     }
 
     public async Task<UserCreateResponse> Handle(InsertUserCommand request, CancellationToken cancellationToken)
@@ -42,7 +38,7 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Use
         }
 
         // Check role in the database
-        var role = await _roleRepository.Find(x => x.Name == ConstantEnum.Role.Customer.ToString()).FirstOrDefaultAsync(cancellationToken);
+        var role = await _roleRepository.Find(x => x.Name == ConstantEnum.Role.Student.ToString()).FirstOrDefaultAsync(cancellationToken);
         if (role == null)
         {
             response.SetMessage(MessageId.E99999);
@@ -58,30 +54,12 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Use
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
                 LastName = request.LastName,
                 FirstName = request.FirstName,
-                RoleId = role.RoleId,
+                RoleId = role.Id,
             };
         
             // Save changes
             await _userRepository.AddAsync(newUser);
             await _userRepository.SaveChangesAsync(newUser.Email);
-            
-            // Insert into MongoDB
-            var newUserMongo = new UserMongo
-            {
-                UserId = newUser.UserId,
-                Email = newUser.Email,
-                FirstName = newUser.FirstName,
-                LastName = newUser.LastName,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
-                RoleId = newUser.RoleId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                CreatedBy = newUser.Email,
-                UpdatedBy = newUser.Email,
-                IsActive = true,
-            };
-            
-            await _userMongoRepository.AddAsync(newUserMongo);
             
             response.Success = true;
             response.SetMessage(MessageId.I00001);

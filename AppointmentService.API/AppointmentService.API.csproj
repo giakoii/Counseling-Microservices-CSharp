@@ -30,6 +30,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AppointmentService.Application\AppointmentService.Application.csproj" />
+      <ProjectReference Include="..\AppointmentService.Infrastructure\AppointmentService.Infrastructure.csproj" />
       <ProjectReference Include="..\Common\Common.csproj" />
     </ItemGroup>
 

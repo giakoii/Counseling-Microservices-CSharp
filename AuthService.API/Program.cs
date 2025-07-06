@@ -1,22 +1,20 @@
 using System.Net;
 using AuthService.API;
-using AuthService.Application.Users.Commands;
-using AuthService.Domain.WriteModels;
-using AuthService.Infrastructure;
-using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
-using AuthService.API.Utils;
 using AuthService.API.Utils.Const;
+using AuthService.Application.Users.Commands;
+using AuthService.Domain;
+using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
 using Common.SystemClient;
 using DotNetEnv;
+using JasperFx;
+using Marten;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Abstractions;
 using Shared.Application.Repositories;
-using Shared.Infrastructure.MongoDB.Repositories;
-using Shared.Infrastructure.PostgreSQL.Context;
-using Shared.Infrastructure.PostgreSQL.Repositories;
+using Shared.Infrastructure.Context;
+using Shared.Infrastructure.Repositories;
 using OpenApiSecurityScheme = NSwag.OpenApiSecurityScheme;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +24,6 @@ Env.Load();
 
 // Get the connection string from environment variables
 var postgreConnectionString = Environment.GetEnvironmentVariable(ConstEnv.AuthServiceDB);
-var mongoConnectionString = Environment.GetEnvironmentVariable(ConstEnv.MonGoConnectionString);
 
 
 builder.Services.AddDataProtection();
@@ -38,28 +35,28 @@ builder.Services.AddDbContext<AuthServiceContext>(options =>
     options.UseOpenIddict();
 });
 
-builder.Services.AddSingleton<IMongoClient>(sp =>
+// Configure Marten for NoSQL operations
+builder.Services.AddMarten(options =>
 {
-    var settings = MongoClientSettings.FromConnectionString(mongoConnectionString);
-    return new MongoClient(settings);
+    options.Connection(postgreConnectionString);
+    options.AutoCreateSchemaObjects = AutoCreate.All;
+    options.DatabaseSchemaName = "AuthServiceDB_Marten";
 });
-
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
-{
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("AuthServiceDB");
-});
-
 
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 builder.Services.AddScoped<AppDbContext, AuthServiceContext>();
 builder.Services.AddScoped<IIdentityApiClient, IdentityApiClient>();
 
 
 builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
-builder.Services.AddScoped(typeof(ISqlQueryRepository<>), typeof(SqlQueryRepository<>));
-builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlQueryRepository<>));
+builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
+builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlRepository<>));
 builder.Services.AddScoped<ICommandRepository<User>, CommandRepository<User>>();
 builder.Services.AddScoped<ICommandRepository<Role>, CommandRepository<Role>>();
 
@@ -81,16 +78,13 @@ builder.Services.AddOpenApiDocument(config =>
             Description = "Copy this into the value field: Bearer {token}"
         }
     );
-    // config.DocumentProcessors.Add(new OrderOperationsProcessor);
 });
-
-
 
 // Allow API to be read from outside
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
-        builder => builder
+        corsPolicyBuilder => corsPolicyBuilder
             .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -171,20 +165,12 @@ using (var scope = app.Services.CreateScope())
     {
         context.Roles.AddRange(new[]
         {
-            new Role { RoleId = Guid.NewGuid(), Name = "Admin", NormalizedName = "ADMIN" },
-            new Role { RoleId = Guid.NewGuid(), Name = "Customer", NormalizedName = "CUSTOMER"},
-            new Role { RoleId = Guid.NewGuid(), Name = "Consultant", NormalizedName = "CONSULTANT" },
+            new Role { Id = Guid.NewGuid(), Name = "Admin", NormalizedName = "ADMIN" },
+            new Role { Id = Guid.NewGuid(), Name = "Student", NormalizedName = "STUDENT"},
+            new Role { Id = Guid.NewGuid(), Name = "Consultant", NormalizedName = "CONSULTANT" },
         });
         context.SaveChanges();
     }
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var mongoClientDB = scope.ServiceProvider.GetRequiredService<IMongoClient>();
-    
-    var initializer = new MongoDbInitializer(mongoClientDB, "AuthServiceDB");
-    initializer.InitializeCollections();
 }
 
 app.UseCors();
@@ -198,4 +184,3 @@ app.MapControllers();
 app.UseOpenApi();
 app.UseSwaggerUi();
 app.Run();
-

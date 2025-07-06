@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="DotNetEnv" Version="3.1.1" />
+      <PackageReference Include="Marten" Version="8.3.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
@@ -20,12 +21,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Data\Contexts\QueryDbContext\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\AppointmentService.Domain\AppointmentService.Domain.csproj" />
-      <ProjectReference Include="..\Shared.Infrastructure.PostgreSQL\Shared.Infrastructure.PostgreSQL.csproj" />
+      <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

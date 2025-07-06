@@ -1,4 +1,4 @@
-using AuthService.Domain.ReadModels;
+using AuthService.Domain;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
@@ -10,9 +10,9 @@ public record SelectUserProfileQuery(Guid UserId) : IQuery<SelectUserProfileResp
 
 internal class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQuery, SelectUserProfileResponse>
 {
-    private readonly INoSqlQueryRepository<UserMongo> _userProfileRepository;
+    private readonly INoSqlQueryRepository<User> _userProfileRepository;
 
-    public SelectUserProfileQueryHandler(INoSqlQueryRepository<UserMongo> userProfileRepository)
+    public SelectUserProfileQueryHandler(INoSqlQueryRepository<User> userProfileRepository)
     {
         _userProfileRepository = userProfileRepository;
     }
@@ -21,7 +21,7 @@ internal class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQu
     {
         var response = new SelectUserProfileResponse {Success = false};
         
-        var userSelect = await _userProfileRepository.FindOneAsync(x => x.UserId == request.UserId && x.IsActive);
+        var userSelect = await _userProfileRepository.FindOneAsync(x => x.Id == request.UserId && x.IsActive);
         if (userSelect == null)
         {
             response.SetMessage(MessageId.E11001);
@@ -30,7 +30,7 @@ internal class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQu
 
         var userProfileEntity = new SelectUserProfileEntity
         {
-            UserId = userSelect.UserId,
+            UserId = userSelect.Id,
             Email = userSelect.Email,
             PhoneNumber = userSelect.PhoneNumber,
             FirstName = userSelect.FirstName,
@@ -43,6 +43,7 @@ internal class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQu
 
         response.Response = userProfileEntity;
         response.Success = true;
+        response.SetMessage(MessageId.I00001);
         return response;
     }
 }

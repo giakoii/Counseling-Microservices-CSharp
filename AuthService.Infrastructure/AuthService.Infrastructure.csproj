@@ -34,8 +34,7 @@
       <ProjectReference Include="..\AuthService.Application\AuthService.Application.csproj" />
       <ProjectReference Include="..\AuthService.Domain\AuthService.Domain.csproj" />
       <ProjectReference Include="..\Shared.Application\Shared.Application.csproj" />
-      <ProjectReference Include="..\Shared.Infrastructure.MongoDB\Shared.Infrastructure.MongoDB.csproj" />
-      <ProjectReference Include="..\Shared.Infrastructure.PostgreSQL\Shared.Infrastructure.PostgreSQL.csproj" />
+      <ProjectReference Include="..\Shared.Infrastructure\Shared.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

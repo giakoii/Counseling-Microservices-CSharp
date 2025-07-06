@@ -1,16 +1,75 @@
+using System.Net;
+using AppointmentService.Infrastructure.Data.Contexts;
 using Common.Utils.Const;
 using DotNetEnv;
+using JasperFx;
+using Marten;
+using Microsoft.EntityFrameworkCore;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using OpenIddict.Validation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-
 // Load environment variables from .env file
 Env.Load();
 
+Env.Load();
+
+// Get the connection string from environment variables
+var postgreConnectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
+
+
+builder.Services.AddDataProtection();
+
+builder.Services.AddDbContext<AppointmentServiceContext>(options =>
+{ 
+    options.UseNpgsql(postgreConnectionString);
+});
+
+// Configure Marten for NoSQL operations
+builder.Services.AddMarten(options =>
+{
+    options.Connection(postgreConnectionString);
+    options.AutoCreateSchemaObjects = AutoCreate.All;
+    options.DatabaseSchemaName = "AppointmentServiceDB_Marten";
+});
+
 builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
+
+builder.Services.AddOpenApi();
+
+// Swagger configuration to output API type definitions
+builder.Services.AddOpenApiDocument(config =>
+{
+    config.OperationProcessors.Add(new OperationSecurityScopeProcessor("JWT Token"));
+    config.AddSecurity("JWT Token", Enumerable.Empty<string>(),
+        new OpenApiSecurityScheme()
+        {
+            Type = OpenApiSecuritySchemeType.ApiKey,
+            Name = nameof(Authorization),
+            In = OpenApiSecurityApiKeyLocation.Header,
+            Description = "Copy this into the value field: Bearer {token}"
+        }
+    );
+});
+
+// Allow API to be read from outside
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+    );
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -43,5 +102,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
+app.MapControllers();
+app.UseOpenApi();
+app.UseSwaggerUi();
 app.Run();

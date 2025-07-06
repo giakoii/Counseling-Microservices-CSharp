@@ -17,7 +17,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AuthService.API.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/user")]
 public class UserController : ControllerBase
 {
     private readonly IOpenIddictScopeManager _scopeManager;
@@ -57,7 +57,7 @@ public class UserController : ControllerBase
     [HttpGet]
     [Route("[action]")]
     [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
-    public SelectUserProfileResponse SelectUserProfile([FromQuery] SelectUserProfileQuery request)
+    public async Task<IActionResult> SelectUserProfile([FromQuery] SelectUserProfileQuery request)
     {
         var identity = _identityApiClient.GetIdentity(User);
 
@@ -65,11 +65,15 @@ public class UserController : ControllerBase
         {
             var response = new SelectUserProfileResponse { Success = false };
             response.SetMessage(MessageId.E11001);
-            return response;
+            return Unauthorized(response);
         }
 
-        var result = _mediator.Send(request with { UserId = Guid.Parse(identity.UserId) }).Result;
-        return result;
+        var result = await _mediator.Send(request with { UserId = Guid.Parse(identity.UserId) });
+        if (result.MessageId == MessageId.E11001)
+        {
+            return Unauthorized(result);
+        }
+        return Ok(result);
     }
 
     /// <summary>
@@ -155,9 +159,6 @@ public class UserController : ControllerBase
                     case Claims.Name:
                         identity.SetClaim(Claims.Name, claim.Value, Destinations.AccessToken);
                         break;
-                    case "UserId":
-                        identity.SetClaim("UserId", claim.Value, Destinations.AccessToken);
-                        break;
                     case Claims.Email:
                         identity.SetClaim(Claims.Email, claim.Value, Destinations.AccessToken);
                         break;
@@ -180,7 +181,6 @@ public class UserController : ControllerBase
                 {
                     Claims.Subject => new[] { Destinations.AccessToken },
                     Claims.Name => new[] { Destinations.AccessToken },
-                    "UserId" => new[] { Destinations.AccessToken },
                     Claims.Email => new[] { Destinations.AccessToken },
                     Claims.PhoneNumber => new[] { Destinations.AccessToken },
                     Claims.Role => new[] { Destinations.AccessToken },
@@ -245,8 +245,6 @@ public class UserController : ControllerBase
             Destinations.AccessToken);
         identity.SetClaim(Claims.Name, userPasswordLogin.Response.FullName,
             Destinations.AccessToken);
-        identity.SetClaim("UserId", userPasswordLogin.Response.UserId.ToString(),
-            Destinations.AccessToken);
         identity.SetClaim(Claims.Email, userPasswordLogin.Response.Email,
             Destinations.AccessToken);
         identity.SetClaim(Claims.PhoneNumber, userPasswordLogin.Response.Email,
@@ -262,7 +260,6 @@ public class UserController : ControllerBase
             {
                 Claims.Subject => new[] { Destinations.AccessToken },
                 Claims.Name => new[] { Destinations.AccessToken },
-                "UserId" => new[] { Destinations.AccessToken },
                 Claims.Email => new[] { Destinations.AccessToken },
                 Claims.Role => new[] { Destinations.AccessToken },
                 Claims.Audience => new[] { Destinations.AccessToken },
