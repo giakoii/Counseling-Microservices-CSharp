@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace AppointmentService.Infrastructure;
+﻿namespace AppointmentService.Domain;
 
 public partial class Payment
 {
