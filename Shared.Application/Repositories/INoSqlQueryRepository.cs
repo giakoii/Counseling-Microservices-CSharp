@@ -10,6 +10,13 @@ public interface INoSqlQueryRepository<TEntity> where TEntity : class
     Task<List<TEntity>> FindAllAsync();
 
     /// <summary>
+    /// Find entities by predicate as asynchronous
+    /// </summary>
+    /// <param name="predicate"></param>
+    /// <returns></returns>
+    Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate);
+
+    /// <summary>
     /// Find entities by predicate
     /// </summary>
     /// <returns></returns>
