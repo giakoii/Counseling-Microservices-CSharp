@@ -1,12 +1,10 @@
-namespace Client.Utils.Consts;
+namespace Common.Utils.Const;
 
 public static class ConstRole
 {
-    public const string Customer = "Customer";
+    public const string Student = "Student";
     
-    public const string SaleEmployee = "SaleEmployee";
+    public const string Consultant = "Consultant";
     
-    public const string PlannedCustomer = "PlannedCustomer";
-    
-    public const string Owner = "Owner";
+    public const string Admin = "Admin";
 }
