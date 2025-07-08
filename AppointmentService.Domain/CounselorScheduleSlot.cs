@@ -9,6 +9,8 @@ public partial class CounselorScheduleSlot
     public Guid ScheduleDayId { get; set; }
 
     public short SlotId { get; set; }
+    
+    public short Status { get; set; }
 
     [JsonIgnore]
     public virtual CounselorScheduleDay ScheduleDay { get; set; } = null!;

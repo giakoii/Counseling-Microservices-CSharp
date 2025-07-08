@@ -95,6 +95,7 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
                         {
                             ScheduleDayId = counselorScheduleDay.Id,
                             SlotId = slot!.Id,
+                            Status = ((short) ConstantEnum.ScheduleStatus.Available),
                         };
                         counselorScheduleSlots.Add(counselorScheduleSlot);
                     }

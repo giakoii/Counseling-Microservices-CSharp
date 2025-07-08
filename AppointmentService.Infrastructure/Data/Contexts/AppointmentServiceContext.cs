@@ -186,6 +186,9 @@ public partial class AppointmentServiceContext : AppDbContext
                 .HasColumnName("id");
             entity.Property(e => e.ScheduleDayId).HasColumnName("schedule_day_id");
             entity.Property(e => e.SlotId).HasColumnName("slot_id");
+            
+            entity.Property(e => e.Status)
+                .HasColumnName("status");
 
             entity.HasOne(d => d.ScheduleDay).WithMany(p => p.CounselorScheduleSlots)
                 .HasForeignKey(d => d.ScheduleDayId)
