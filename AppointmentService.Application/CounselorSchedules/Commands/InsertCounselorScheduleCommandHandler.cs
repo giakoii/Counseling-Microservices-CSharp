@@ -18,8 +18,16 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
     private readonly ICommandRepository<CounselorScheduleDay> _counselorScheduleDayRepository;
     private readonly ICommandRepository<CounselorScheduleSlot> _counselorScheduleSlotRepository;
     private readonly IPublishEndpoint _publishEndpoint;
-
-
+    
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="counselorScheduleRepository"></param>
+    /// <param name="weekdayRepository"></param>
+    /// <param name="timeSlotRepository"></param>
+    /// <param name="counselorScheduleDayRepository"></param>
+    /// <param name="counselorScheduleSlotRepository"></param>
+    /// <param name="publishEndpoint"></param>
     public InsertCounselorScheduleCommandHandler( ICommandRepository<CounselorSchedule> counselorScheduleRepository, ICommandRepository<Weekday> weekdayRepository, ICommandRepository<TimeSlot> timeSlotRepository, ICommandRepository<CounselorScheduleDay> counselorScheduleDayRepository, ICommandRepository<CounselorScheduleSlot> counselorScheduleSlotRepository, IPublishEndpoint publishEndpoint)
     {
         _weekdayRepository = weekdayRepository;
@@ -30,6 +38,12 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
         _counselorScheduleRepository = counselorScheduleRepository;
     }
 
+    /// <summary>
+    /// Handles the InsertCounselorScheduleCommand to insert a new counselor schedule.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task<BaseResponse> Handle(InsertCounselorScheduleCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseResponse { Success = false };
