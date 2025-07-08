@@ -3,7 +3,8 @@ using AuthService.API;
 using AuthService.API.Utils.Const;
 using AuthService.Application.Users.Commands;
 using AuthService.Domain;
-using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
+using AuthService.Infrastructure.Data.Contexts;
+using BuildingBlocks.Messaging.Extensions;
 using Common.SystemClient;
 using DotNetEnv;
 using JasperFx;
@@ -60,10 +61,14 @@ builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlReposito
 builder.Services.AddScoped<ICommandRepository<User>, CommandRepository<User>>();
 builder.Services.AddScoped<ICommandRepository<Role>, CommandRepository<Role>>();
 
+// Add MassTransit with RabbitMQ
+builder.Services.AddMassTransitWithRabbitMQ();
+
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(InsertUserCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(LoginUserCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(InsertCounselorCommand).Assembly);
 });
 
 builder.Services.AddOpenApiDocument(config =>

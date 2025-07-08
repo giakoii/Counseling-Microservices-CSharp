@@ -3,7 +3,7 @@ using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Context;
 
-namespace AuthService.Infrastructure.Data.Contexts.CommandDbContext;
+namespace AuthService.Infrastructure.Data.Contexts;
 
 public class AuthServiceContext : AppDbContext
 {

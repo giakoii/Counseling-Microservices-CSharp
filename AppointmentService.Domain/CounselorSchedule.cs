@@ -1,16 +1,12 @@
-﻿namespace AppointmentService.Domain;
+﻿using System.Text.Json.Serialization;
+using Marten.Schema;
+
+namespace AppointmentService.Domain;
 
 public partial class CounselorSchedule
 {
-    public Guid ScheduleId { get; set; }
-
-    public Guid CounselorId { get; set; }
-
-    public short DayId { get; set; }
-
-    public int SlotId { get; set; }
-
-    public short? StatusId { get; set; }
+    [Identity]
+    public string CounselorEmail { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 
@@ -22,9 +18,7 @@ public partial class CounselorSchedule
 
     public string UpdatedBy { get; set; } = null!;
 
-    public virtual Weekday Day { get; set; } = null!;
-
-    public virtual TimeSlot Slot { get; set; } = null!;
-
-    public virtual WeekdayTimeSlot WeekdayTimeSlot { get; set; } = null!;
+    [JsonIgnore]
+    public virtual ICollection<CounselorScheduleDay> CounselorScheduleDays { get; set; } = new List<CounselorScheduleDay>();
 }
+

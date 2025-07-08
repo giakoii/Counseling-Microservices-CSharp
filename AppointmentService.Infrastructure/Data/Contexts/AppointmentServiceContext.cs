@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using AppointmentService.Infrastructure;
+﻿using AppointmentService.Domain;
+using Common.Utils.Const;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Context;
 
 namespace AppointmentService.Infrastructure.Data.Contexts;
 
-public partial class AppointmentServiceContext : DbContext
+public partial class AppointmentServiceContext : AppDbContext
 {
-    public AppointmentServiceContext()
-    {
-    }
-
     public AppointmentServiceContext(DbContextOptions<AppointmentServiceContext> options)
         : base(options)
     {
@@ -22,24 +19,26 @@ public partial class AppointmentServiceContext : DbContext
 
     public virtual DbSet<CounselorSchedule> CounselorSchedules { get; set; }
 
+    public virtual DbSet<CounselorScheduleDay> CounselorScheduleDays { get; set; }
+
+    public virtual DbSet<CounselorScheduleSlot> CounselorScheduleSlots { get; set; }
+
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<TimeSlot> TimeSlots { get; set; }
 
     public virtual DbSet<Weekday> Weekdays { get; set; }
 
-    public virtual DbSet<WeekdayTimeSlot> WeekdayTimeSlots { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
-            DotNetEnv.Env.Load(); 
+            Env.Load(); 
 
-            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("Missing CONNECTION_STRING environment variable");
+                throw new InvalidOperationException("Missing AppointmentServiceDB environment variable");
 
             optionsBuilder.UseNpgsql(connectionString);
         }
@@ -127,55 +126,76 @@ public partial class AppointmentServiceContext : DbContext
 
         modelBuilder.Entity<CounselorSchedule>(entity =>
         {
-            entity.HasKey(e => e.ScheduleId).HasName("counselor_schedules_pkey");
+            entity.HasKey(e => e.CounselorEmail).HasName("counselor_schedules_pkey");
 
             entity.ToTable("counselor_schedules");
 
-            entity.HasIndex(e => e.CounselorId, "idx_counselor_schedules_counselor_id");
-
-            entity.HasIndex(e => e.DayId, "idx_counselor_schedules_day_id");
-
-            entity.HasIndex(e => e.SlotId, "idx_counselor_schedules_slot_id");
-
-            entity.Property(e => e.ScheduleId)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("schedule_id");
-            entity.Property(e => e.CounselorId).HasColumnName("counselor_id");
+            entity.Property(e => e.CounselorEmail)
+                .HasMaxLength(100)
+                .HasColumnName("counselor_email");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("created_by");
-            entity.Property(e => e.DayId).HasColumnName("day_id");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
-            entity.Property(e => e.SlotId).HasColumnName("slot_id");
-            entity.Property(e => e.StatusId)
-                .HasDefaultValue((short)1)
-                .HasColumnName("status_id");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("updated_by");
+        });
 
-            entity.HasOne(d => d.Day).WithMany(p => p.CounselorSchedules)
-                .HasForeignKey(d => d.DayId)
+        modelBuilder.Entity<CounselorScheduleDay>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("counselor_schedule_days_pkey");
+
+            entity.ToTable("counselor_schedule_days");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.CounselorEmail)
+                .HasMaxLength(100)
+                .HasColumnName("counselor_email");
+            entity.Property(e => e.WeekdayId).HasColumnName("weekday_id");
+
+            entity.HasOne(d => d.CounselorEmailNavigation).WithMany(p => p.CounselorScheduleDays)
+                .HasForeignKey(d => d.CounselorEmail)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_counselor_schedules_day");
+                .HasConstraintName("counselor_schedule_days_schedule_email_fkey");
 
-            entity.HasOne(d => d.Slot).WithMany(p => p.CounselorSchedules)
+            entity.HasOne(d => d.Weekday).WithMany(p => p.CounselorScheduleDays)
+                .HasForeignKey(d => d.WeekdayId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("counselor_schedule_days_weekday_id_fkey");
+        });
+
+        modelBuilder.Entity<CounselorScheduleSlot>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("counselor_schedule_slots_pkey");
+
+            entity.ToTable("counselor_schedule_slots");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.ScheduleDayId).HasColumnName("schedule_day_id");
+            entity.Property(e => e.SlotId).HasColumnName("slot_id");
+
+            entity.HasOne(d => d.ScheduleDay).WithMany(p => p.CounselorScheduleSlots)
+                .HasForeignKey(d => d.ScheduleDayId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("counselor_schedule_slots_schedule_day_id_fkey");
+
+            entity.HasOne(d => d.Slot).WithMany(p => p.CounselorScheduleSlots)
                 .HasForeignKey(d => d.SlotId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_counselor_schedules_slot");
-
-            entity.HasOne(d => d.WeekdayTimeSlot).WithMany(p => p.CounselorSchedules)
-                .HasForeignKey(d => new { d.DayId, d.SlotId })
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_day_slot_combination");
+                .HasConstraintName("counselor_schedule_slots_slot_id_fkey");
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -227,47 +247,29 @@ public partial class AppointmentServiceContext : DbContext
 
         modelBuilder.Entity<TimeSlot>(entity =>
         {
-            entity.HasKey(e => e.SlotId).HasName("time_slots_pkey");
+            entity.HasKey(e => e.Id).HasName("time_slots_pkey");
 
             entity.ToTable("time_slots");
 
-            entity.Property(e => e.SlotId).HasColumnName("slot_id");
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("nextval('time_slots_slot_id_seq'::regclass)")
+                .HasColumnName("id");
             entity.Property(e => e.EndTime).HasColumnName("end_time");
             entity.Property(e => e.StartTime).HasColumnName("start_time");
         });
 
         modelBuilder.Entity<Weekday>(entity =>
         {
-            entity.HasKey(e => e.DayId).HasName("weekdays_pkey");
+            entity.HasKey(e => e.Id).HasName("weekdays_pkey");
 
             entity.ToTable("weekdays");
 
-            entity.Property(e => e.DayId)
+            entity.Property(e => e.Id)
                 .ValueGeneratedNever()
-                .HasColumnName("day_id");
+                .HasColumnName("id");
             entity.Property(e => e.DayName)
                 .HasMaxLength(50)
                 .HasColumnName("day_name");
-        });
-
-        modelBuilder.Entity<WeekdayTimeSlot>(entity =>
-        {
-            entity.HasKey(e => new { e.DayId, e.SlotId }).HasName("weekday_time_slots_pkey");
-
-            entity.ToTable("weekday_time_slots");
-
-            entity.Property(e => e.DayId).HasColumnName("day_id");
-            entity.Property(e => e.SlotId).HasColumnName("slot_id");
-
-            entity.HasOne(d => d.Day).WithMany(p => p.WeekdayTimeSlots)
-                .HasForeignKey(d => d.DayId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("weekday_time_slots_day_id_fkey");
-
-            entity.HasOne(d => d.Slot).WithMany(p => p.WeekdayTimeSlots)
-                .HasForeignKey(d => d.SlotId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("weekday_time_slots_slot_id_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

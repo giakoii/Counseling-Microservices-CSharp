@@ -1,4 +1,6 @@
-﻿namespace AppointmentService.Domain;
+﻿using System.Text.Json.Serialization;
+
+namespace AppointmentService.Domain;
 
 public partial class Payment
 {
@@ -24,5 +26,6 @@ public partial class Payment
 
     public string UpdatedBy { get; set; } = null!;
 
+    [JsonIgnore]
     public virtual Appointment Appointment { get; set; } = null!;
 }

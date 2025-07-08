@@ -1,7 +1,8 @@
+using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace RabbitMQ.Extensions;
+namespace BuildingBlocks.Messaging.Extensions;
 
 public static class MassTransitConfiguration
 {
@@ -14,7 +15,6 @@ public static class MassTransitConfiguration
             {
                 x.AddConsumer(consumer);
             }
-            // Request
 
             x.UsingRabbitMq((context, cfg) =>
             {

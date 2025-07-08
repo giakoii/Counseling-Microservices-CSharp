@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AuthService.API.Helpers;
 using AuthService.Application.Users.Commands;
+using Common;
 using Common.SystemClient;
 using Common.Utils.Const;
 using MediatR;
@@ -25,8 +26,7 @@ public class UserController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IIdentityApiClient _identityApiClient;
 
-    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager,
-        IOpenIddictTokenManager tokenManager, IIdentityApiClient identityApiClient)
+    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager, IOpenIddictTokenManager tokenManager, IIdentityApiClient identityApiClient)
     {
         _mediator = mediator;
         _scopeManager = scopeManager;
@@ -34,30 +34,65 @@ public class UserController : ControllerBase
         _identityApiClient = identityApiClient;
     }
 
+    /// <summary>
+    /// Insert a new user into the system.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost]
     [Route("[action]")]
-    public UserCreateResponse CreateUser([FromBody] InsertUserCommand request)
+    public async Task<IActionResult> InsertUser([FromBody] InsertUserCommand request)
     {
+        var response = new BaseResponse { Success = false };
         try
         {
-            var response = _mediator.Send(request).Result;
-            return response;
+            response = await _mediator.Send(request);
+            return Ok(response);
         }
         catch (Exception e)
         {
-            return new UserCreateResponse
+            response.SetMessage(MessageId.E99999);
+            return  BadRequest(response);
+        }
+    }
+    
+    /// <summary>
+    /// Insert a new counselor into the system by admin.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [Route("[action]")]
+    [Authorize(Roles = ConstRole.Admin, AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> InsertCounselor([FromBody] InsertCounselorCommand request)
+    {
+        var response = new BaseResponse { Success = false };
+        try
+        {
+            response = await _mediator.Send(request);
+            if (response.MessageId == MessageId.E99999)
             {
-                Success = false,
-                MessageId = MessageId.E00000,
-                Message = e.Message
-            };
+                return BadRequest(response);
+            }
+            
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            response.SetMessage(MessageId.E99999);
+            return  BadRequest(response);
         }
     }
 
+    /// <summary>
+    /// Select user profile
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpGet]
     [Route("[action]")]
     [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> SelectUserProfile([FromQuery] SelectUserProfileQuery request)
+    public async Task<IActionResult> SelectUserProfile()
     {
         var identity = _identityApiClient.GetIdentity(User);
 
@@ -68,7 +103,7 @@ public class UserController : ControllerBase
             return Unauthorized(response);
         }
 
-        var result = await _mediator.Send(request with { UserId = Guid.Parse(identity.UserId) });
+        var result = await _mediator.Send(new SelectUserProfileQuery(Guid.Parse(identity.UserId)));
         if (result.MessageId == MessageId.E11001)
         {
             return Unauthorized(result);

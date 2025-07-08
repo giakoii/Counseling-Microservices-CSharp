@@ -12,9 +12,9 @@ public record InsertUserCommand (
     string Password,
     string FirstName,
     string LastName
-) : ICommand<UserCreateResponse>;
+) : ICommand<BaseResponse>;
 
-internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, UserCreateResponse>
+internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, BaseResponse>
 {
     private readonly ICommandRepository<User> _userRepository;
     private readonly ICommandRepository<Role> _roleRepository;
@@ -25,9 +25,9 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Use
         _roleRepository = roleRepository;
     }
 
-    public async Task<UserCreateResponse> Handle(InsertUserCommand request, CancellationToken cancellationToken)
+    public async Task<BaseResponse> Handle(InsertUserCommand request, CancellationToken cancellationToken)
     {
-        var response = new UserCreateResponse {Success = false};
+        var response = new BaseResponse {Success = false};
         
         // Validate email
         var emailExist = await _userRepository.Find(x => x.Email == request.Email && x.IsActive, true).FirstOrDefaultAsync(cancellationToken);
@@ -68,9 +68,4 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Use
         return response;
     }
     
-}
-
-public class UserCreateResponse : AbstractResponse<string>
-{
-    public override string Response { get; set; }
 }

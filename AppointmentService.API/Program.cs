@@ -1,13 +1,22 @@
 using System.Net;
+using System.Text.Json.Serialization;
+using AppointmentService.Application.CounselorSchedules.Commands;
+using AppointmentService.Application.CounselorSchedules.Consumers;
+using AppointmentService.Domain;
 using AppointmentService.Infrastructure.Data.Contexts;
+using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
 using Common.Utils.Const;
 using DotNetEnv;
 using JasperFx;
 using Marten;
-using Microsoft.EntityFrameworkCore;
+using MassTransit;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Validation.AspNetCore;
+using Shared.Application.Repositories;
+using Shared.Infrastructure.Context;
+using Shared.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,29 +26,56 @@ Env.Load();
 Env.Load();
 
 // Get the connection string from environment variables
-var postgreConnectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
-
+var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
 
 builder.Services.AddDataProtection();
 
 builder.Services.AddDbContext<AppointmentServiceContext>(options =>
 { 
-    options.UseNpgsql(postgreConnectionString);
+    options.UseNpgsql(connectionString);
 });
 
 // Configure Marten for NoSQL operations
 builder.Services.AddMarten(options =>
 {
-    options.Connection(postgreConnectionString);
+    options.Connection(connectionString);
     options.AutoCreateSchemaObjects = AutoCreate.All;
     options.DatabaseSchemaName = "AppointmentServiceDB_Marten";
 });
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(InsertCounselorScheduleCommand).Assembly);
+});
+
+// // Register the DbContext for SQL operations
+builder.Services.AddScoped<AppDbContext, AppointmentServiceContext>();
+
+// Add MassTransit with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<InsertCounselorScheduleEventConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+
+    x.AddRequestClient<InsertCounselorScheduleRequest>();
+});
+
+builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
+builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
+builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlRepository<>));
+builder.Services.AddScoped<ICommandRepository<CounselorSchedule> , CommandRepository<CounselorSchedule>>();
+builder.Services.AddScoped<ICommandRepository<Weekday> , CommandRepository<Weekday>>();
+builder.Services.AddScoped<ICommandRepository<TimeSlot> , CommandRepository<TimeSlot>>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
         options.JsonSerializerOptions.WriteIndented = true;
     });
 

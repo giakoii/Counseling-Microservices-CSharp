@@ -1,4 +1,4 @@
-using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
+using AuthService.Infrastructure.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 

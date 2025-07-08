@@ -6,4 +6,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\AppointmentService.Infrastructure\AppointmentService.Infrastructure.csproj" />
+      <ProjectReference Include="..\BuildingBlocks.Messaging\BuildingBlocks.Messaging.csproj" />
+      <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.csproj" />
+      <ProjectReference Include="..\Common\Common.csproj" />
+    </ItemGroup>
+
 </Project>

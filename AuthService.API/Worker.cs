@@ -1,4 +1,4 @@
-using AuthService.Infrastructure.Data.Contexts.CommandDbContext;
+using AuthService.Infrastructure.Data.Contexts;
 using Common.Utils.Const;
 using DotNetEnv;
 using OpenIddict.Abstractions;
