@@ -1,3 +1,4 @@
+using AppointmentService.Application.CounselorSchedules.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,15 +18,15 @@ public class CounselorScheduleController : ControllerBase
         _mediator = mediator;
     }
     
-    // [HttpGet("[action]")]
-    // public async Task<IActionResult> SelectCounselorSchedulesAsync()
-    // {
-    //     var result = await _mediator.Send(new SelectCounselorSchedulesQuery());
-    //     if (result.Success)
-    //     {
-    //         return Ok(result);
-    //     }
-    //     
-    //     return BadRequest(result);
-    // }
+    [HttpGet("[action]")]
+    public async Task<IActionResult> SelectCounselorSchedulesAsync()
+    {
+        var result = await _mediator.Send(new SelectCounselorSchedulesQuery());
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
 }
