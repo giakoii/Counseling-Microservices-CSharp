@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AuthService.API.Helpers;
 using AuthService.Application.Users.Commands;
+using AuthService.Application.Users.Queries;
 using Common;
 using Common.SystemClient;
 using Common.Utils.Const;
@@ -87,7 +88,6 @@ public class UserController : ControllerBase
     /// <summary>
     /// Select user profile
     /// </summary>
-    /// <param name="request"></param>
     /// <returns></returns>
     [HttpGet]
     [Route("[action]")]
@@ -104,6 +104,32 @@ public class UserController : ControllerBase
         }
 
         var result = await _mediator.Send(new SelectUserProfileQuery(Guid.Parse(identity.UserId)));
+        if (result.MessageId == MessageId.E11001)
+        {
+            return Unauthorized(result);
+        }
+        return Ok(result);
+    }
+    
+    /// <summary>
+    /// Get role of the user based on the token.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("[action]")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> SelectToken()
+    {
+        var identity = _identityApiClient.GetIdentity(User);
+
+        if (identity == null)
+        {
+            var response = new SelectTokenQueryResponse { Success = false };
+            response.SetMessage(MessageId.E11001);
+            return Unauthorized(response);
+        }
+
+        var result = await _mediator.Send(new SelectTokenQuery(identity.RoleName));
         if (result.MessageId == MessageId.E11001)
         {
             return Unauthorized(result);

@@ -7,7 +7,7 @@ using Shared.Application.Repositories;
 
 namespace AuthService.Application.Users.Commands;
 
-public record LoginUserCommand(string Email, string Password) : ICommand<LoginResponse>;
+public record LoginUserCommand(string? Email, string? Password) : ICommand<LoginResponse>;
 
 internal class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, LoginResponse>
 {
@@ -19,7 +19,6 @@ internal class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, Login
         _userRepository = userRepository;
         _roleRepository = roleRepository;
     }
-
 
     public async Task<LoginResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
