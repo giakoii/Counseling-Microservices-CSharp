@@ -8,7 +8,7 @@ public partial class CounselorScheduleDay
 
     public string CounselorEmail { get; set; } = null!;
 
-    public short WeekdayId { get; set; }
+    public int WeekdayId { get; set; }
 
     public virtual CounselorSchedule CounselorEmailNavigation { get; set; } = null!;
 

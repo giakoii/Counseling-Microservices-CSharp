@@ -4,7 +4,7 @@ namespace AppointmentService.Domain;
 
 public partial class TimeSlot
 {
-    public short Id { get; set; }
+    public int Id { get; set; }
 
     public TimeOnly StartTime { get; set; }
 

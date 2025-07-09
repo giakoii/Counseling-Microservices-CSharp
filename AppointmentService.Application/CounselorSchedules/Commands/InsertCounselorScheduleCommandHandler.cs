@@ -2,7 +2,6 @@ using AppointmentService.Domain;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Repositories;
 
@@ -17,7 +16,6 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
     private readonly ICommandRepository<TimeSlot> _timeSlotRepository;
     private readonly ICommandRepository<CounselorScheduleDay> _counselorScheduleDayRepository;
     private readonly ICommandRepository<CounselorScheduleSlot> _counselorScheduleSlotRepository;
-    private readonly IPublishEndpoint _publishEndpoint;
     
     /// <summary>
     /// Constructor
@@ -27,14 +25,12 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
     /// <param name="timeSlotRepository"></param>
     /// <param name="counselorScheduleDayRepository"></param>
     /// <param name="counselorScheduleSlotRepository"></param>
-    /// <param name="publishEndpoint"></param>
-    public InsertCounselorScheduleCommandHandler( ICommandRepository<CounselorSchedule> counselorScheduleRepository, ICommandRepository<Weekday> weekdayRepository, ICommandRepository<TimeSlot> timeSlotRepository, ICommandRepository<CounselorScheduleDay> counselorScheduleDayRepository, ICommandRepository<CounselorScheduleSlot> counselorScheduleSlotRepository, IPublishEndpoint publishEndpoint)
+    public InsertCounselorScheduleCommandHandler( ICommandRepository<CounselorSchedule> counselorScheduleRepository, ICommandRepository<Weekday> weekdayRepository, ICommandRepository<TimeSlot> timeSlotRepository, ICommandRepository<CounselorScheduleDay> counselorScheduleDayRepository, ICommandRepository<CounselorScheduleSlot> counselorScheduleSlotRepository)
     {
         _weekdayRepository = weekdayRepository;
         _timeSlotRepository = timeSlotRepository;
         _counselorScheduleDayRepository = counselorScheduleDayRepository;
         _counselorScheduleSlotRepository = counselorScheduleSlotRepository;
-        _publishEndpoint = publishEndpoint;
         _counselorScheduleRepository = counselorScheduleRepository;
     }
 

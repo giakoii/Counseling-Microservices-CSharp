@@ -4,7 +4,7 @@ namespace AppointmentService.Domain;
 
 public partial class Weekday
 {
-    public short Id { get; set; }
+    public int Id { get; set; }
 
     public string DayName { get; set; } = null!;
 
