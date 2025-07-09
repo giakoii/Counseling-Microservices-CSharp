@@ -46,36 +46,60 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
         
         try
         {
+            // Get current day of the week (1 = Monday, 7 = Sunday)
+            var currentDayOfWeek = (int)DateTime.Now.DayOfWeek;
+            
+            // Convert to match your weekday system (assuming 1-7 where Monday = 1)
+            var currentWeekdayId = currentDayOfWeek == 0 ? 7 : currentDayOfWeek;
+            
+            // Get current time
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            
             // Retrieve all counselor schedules
             var counselorSchedules = await _counselorScheduleRepository.FindAllAsync(x => x.IsActive);
             
             var weekdays = await _weekdayRepository.FindAllAsync();
-            var timeSlots = await _timeSlotRepository.FindAllAsync();
             
-            var scheduleDays = await _counselorScheduleDayRepository.FindAllAsync();
+            // Filter time slots that are in the future (start time > current time)
+            var timeSlots = await _timeSlotRepository.FindAllAsync(x => x.StartTime > currentTime);
             
-            var scheduleSlots = await _counselorScheduleSlotRepository.FindAllAsync();
+            // Filter schedule days for current day only
+            var scheduleDays = await _counselorScheduleDayRepository.FindAllAsync(x => x.WeekdayId == currentWeekdayId);
+            
+            // Filter schedule slots for available status (status = 1)
+            var scheduleSlots = await _counselorScheduleSlotRepository.FindAllAsync(x => x.Status == 1);
             
             var scheduleEntities = new List<SelectCounselorSchedulesEntity>();
             
-            foreach (var schedule in counselorSchedules)
+            foreach (var schedule in counselorSchedules!)
             {
-                // Retrieve weekday and time slot details
-                foreach (var scheduleDay in scheduleDays)
+                // Get schedule days for this counselor and current day
+                var counselorScheduleDays = scheduleDays.Where(x => x.CounselorEmail == schedule.CounselorEmail);
+                
+                foreach (var scheduleDay in counselorScheduleDays)
                 {
-                    var timeSlot = scheduleSlots.Find(x => x.ScheduleDayId == scheduleDay.Id);
-                    var weekdayName = weekdays.Find(x => x.Id == scheduleDay.WeekdayId)?.DayName;
-                    var slotName = timeSlots.Find(x => x.Id == timeSlot?.SlotId);
-                    var scheduleEntity = new SelectCounselorSchedulesEntity
+                    // Get available time slots for this schedule day
+                    var availableTimeSlots = scheduleSlots.Where(x => x.ScheduleDayId == scheduleDay.Id);
+                    
+                    foreach (var timeSlot in availableTimeSlots)
                     {
-                        CounselorEmail = schedule.CounselorEmail,
-                        DayId = scheduleDay.WeekdayId,
-                        Day = weekdayName!,
-                        SlotId = timeSlot!.SlotId,
-                        Slot = $"{StringUtil.ConvertToHhMm(slotName!.StartTime)} - {StringUtil.ConvertToHhMm(slotName.EndTime)}",
-                        StatusId = timeSlot.Status
-                    };
-                    scheduleEntities.Add(scheduleEntity);
+                        var weekdayName = weekdays.Find(x => x.Id == scheduleDay.WeekdayId)?.DayName;
+                        var slotName = timeSlots.Find(x => x.Id == timeSlot.SlotId);
+                        
+                        if (slotName != null)
+                        {
+                            var scheduleEntity = new SelectCounselorSchedulesEntity
+                            {
+                                CounselorEmail = schedule.CounselorEmail,
+                                DayId = scheduleDay.WeekdayId,
+                                Day = weekdayName!,
+                                SlotId = timeSlot.SlotId,
+                                Slot = $"{StringUtil.ConvertToHhMm(slotName.StartTime)} - {StringUtil.ConvertToHhMm(slotName.EndTime)}",
+                                StatusId = timeSlot.Status
+                            };
+                            scheduleEntities.Add(scheduleEntity);
+                        }
+                    }
                 }
             }
             
