@@ -48,7 +48,6 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
         {
             // Get current day of the week (1 = Monday, 7 = Sunday)
             var currentDayOfWeek = (int)DateTime.Now.DayOfWeek;
-            
             // Convert to match your weekday system (assuming 1-7 where Monday = 1)
             var currentWeekdayId = currentDayOfWeek == 0 ? 7 : currentDayOfWeek;
             
@@ -60,20 +59,20 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
             
             var weekdays = await _weekdayRepository.FindAllAsync();
             
-            // Filter time slots that are in the future (start time > current time)
-            var timeSlots = await _timeSlotRepository.FindAllAsync(x => x.StartTime > currentTime);
+            // Get all time slots
+            var timeSlots = await _timeSlotRepository.FindAllAsync();
             
-            // Filter schedule days for current day only
-            var scheduleDays = await _counselorScheduleDayRepository.FindAllAsync(x => x.WeekdayId == currentWeekdayId);
+            // Get schedule days for today and future days only
+            var scheduleDays = await _counselorScheduleDayRepository.FindAllAsync(x => x.WeekdayId >= currentWeekdayId);
             
             // Filter schedule slots for available status (status = 1)
             var scheduleSlots = await _counselorScheduleSlotRepository.FindAllAsync(x => x.Status == 1);
             
             var scheduleEntities = new List<SelectCounselorSchedulesEntity>();
             
-            foreach (var schedule in counselorSchedules!)
+            foreach (var schedule in counselorSchedules)
             {
-                // Get schedule days for this counselor and current day
+                // Get schedule days for this counselor (only today and future days)
                 var counselorScheduleDays = scheduleDays.Where(x => x.CounselorEmail == schedule.CounselorEmail);
                 
                 foreach (var scheduleDay in counselorScheduleDays)
@@ -88,16 +87,24 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
                         
                         if (slotName != null)
                         {
-                            var scheduleEntity = new SelectCounselorSchedulesEntity
+                            // For today: only include slots that haven't started yet
+                            // For future days: include all slots
+                            bool isToday = scheduleDay.WeekdayId == currentWeekdayId;
+                            bool isValidSlot = !isToday || slotName.StartTime > currentTime;
+                            
+                            if (isValidSlot)
                             {
-                                CounselorEmail = schedule.CounselorEmail,
-                                DayId = scheduleDay.WeekdayId,
-                                Day = weekdayName!,
-                                SlotId = timeSlot.SlotId,
-                                Slot = $"{StringUtil.ConvertToHhMm(slotName.StartTime)} - {StringUtil.ConvertToHhMm(slotName.EndTime)}",
-                                StatusId = timeSlot.Status
-                            };
-                            scheduleEntities.Add(scheduleEntity);
+                                var scheduleEntity = new SelectCounselorSchedulesEntity
+                                {
+                                    CounselorEmail = schedule.CounselorEmail,
+                                    DayId = scheduleDay.WeekdayId,
+                                    Day = weekdayName!,
+                                    SlotId = timeSlot.SlotId,
+                                    Slot = $"{StringUtil.ConvertToHhMm(slotName.StartTime)} - {StringUtil.ConvertToHhMm(slotName.EndTime)}",
+                                    StatusId = timeSlot.Status
+                                };
+                                scheduleEntities.Add(scheduleEntity);
+                            }
                         }
                     }
                 }
