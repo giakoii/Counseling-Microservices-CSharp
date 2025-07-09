@@ -1,4 +1,5 @@
 using AuthService.Domain;
+using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;

@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace AppointmentService.Domain;
+﻿namespace AppointmentService.Domain.WriteModels;
 
 public partial class Payment
 {
@@ -26,6 +24,5 @@ public partial class Payment
 
     public string UpdatedBy { get; set; } = null!;
 
-    [JsonIgnore]
     public virtual Appointment Appointment { get; set; } = null!;
 }

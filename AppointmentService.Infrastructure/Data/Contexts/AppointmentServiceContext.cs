@@ -1,6 +1,8 @@
-﻿using AppointmentService.Domain;
+﻿using System;
+using System.Collections.Generic;
+using AppointmentService.Domain.WriteModels;
+using AppointmentService.Infrastructure;
 using Common.Utils.Const;
-using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Context;
 
@@ -33,7 +35,7 @@ public partial class AppointmentServiceContext : AppDbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            Env.Load(); 
+            DotNetEnv.Env.Load(); 
 
             var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
 
@@ -162,6 +164,21 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.Property(e => e.CounselorEmail)
                 .HasMaxLength(100)
                 .HasColumnName("counselor_email");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(256)
+                .HasColumnName("created_by");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(256)
+                .HasColumnName("updated_by");
             entity.Property(e => e.WeekdayId).HasColumnName("weekday_id");
 
             entity.HasOne(d => d.CounselorEmailNavigation).WithMany(p => p.CounselorScheduleDays)
@@ -184,11 +201,26 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(256)
+                .HasColumnName("created_by");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
             entity.Property(e => e.ScheduleDayId).HasColumnName("schedule_day_id");
             entity.Property(e => e.SlotId).HasColumnName("slot_id");
-            
             entity.Property(e => e.Status)
+                .HasDefaultValue((short)1)
                 .HasColumnName("status");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(256)
+                .HasColumnName("updated_by");
 
             entity.HasOne(d => d.ScheduleDay).WithMany(p => p.CounselorScheduleSlots)
                 .HasForeignKey(d => d.ScheduleDayId)

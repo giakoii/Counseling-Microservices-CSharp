@@ -2,13 +2,17 @@ using System.Net;
 using AuthService.API;
 using AuthService.API.Utils.Const;
 using AuthService.Application.Users.Commands;
-using AuthService.Domain;
+using AuthService.Application.Users.Consumers;
+using AuthService.Application.Users.Queries;
+using AuthService.Domain.ReadModels;
+using AuthService.Domain.WriteModels;
 using AuthService.Infrastructure.Data.Contexts;
-using BuildingBlocks.Messaging.Extensions;
+using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.SystemClient;
 using DotNetEnv;
 using JasperFx;
 using Marten;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -24,7 +28,7 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Get the connection string from environment variables
-var postgreConnectionString = Environment.GetEnvironmentVariable(ConstEnv.AuthServiceDB);
+var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AuthServiceDB);
 
 
 builder.Services.AddDataProtection();
@@ -32,16 +36,18 @@ builder.Services.AddHostedService<Worker>();
 
 builder.Services.AddDbContext<AuthServiceContext>(options =>
 { 
-    options.UseNpgsql(postgreConnectionString);
+    options.UseNpgsql(connectionString);
     options.UseOpenIddict();
 });
 
 // Configure Marten for NoSQL operations
 builder.Services.AddMarten(options =>
 {
-    options.Connection(postgreConnectionString);
+    options.Connection(connectionString!);
     options.AutoCreateSchemaObjects = AutoCreate.All;
     options.DatabaseSchemaName = "AuthServiceDB_Marten";
+    
+    options.Schema.For<UserCollection>().Identity(x => x.Id);
 });
 
 builder.Services.AddOpenApi();
@@ -62,13 +68,24 @@ builder.Services.AddScoped<ICommandRepository<User>, CommandRepository<User>>();
 builder.Services.AddScoped<ICommandRepository<Role>, CommandRepository<Role>>();
 
 // Add MassTransit with RabbitMQ
-builder.Services.AddMassTransitWithRabbitMQ();
+// Configure messaging with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<SelectCounselorEventConsumer>();
 
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+
+    x.AddRequestClient<SelectCounselorScheduleEvent>();
+});
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(InsertUserCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(LoginUserCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(InsertCounselorCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(SelectCounselorQuery).Assembly);
 });
 
 builder.Services.AddOpenApiDocument(config =>

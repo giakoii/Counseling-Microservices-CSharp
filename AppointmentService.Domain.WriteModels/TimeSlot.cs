@@ -1,15 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AppointmentService.Domain;
+namespace AppointmentService.Infrastructure;
 
 public partial class TimeSlot
 {
-    public int Id { get; set; }
+    public short Id { get; set; }
 
     public TimeOnly StartTime { get; set; }
 
     public TimeOnly EndTime { get; set; }
 
-    [JsonIgnore]
     public virtual ICollection<CounselorScheduleSlot> CounselorScheduleSlots { get; set; } = new List<CounselorScheduleSlot>();
 }

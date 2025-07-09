@@ -1,4 +1,6 @@
-using AppointmentService.Domain;
+using AppointmentService.Application.Mappers;
+using AppointmentService.Domain.ReadModels;
+using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
@@ -7,7 +9,7 @@ using Shared.Application.Repositories;
 
 namespace AppointmentService.Application.CounselorSchedules.Commands;
 
-public record InsertCounselorScheduleCommand(string CounselorEmail) : ICommand<BaseResponse>;
+public record InsertCounselorScheduleCommand(string CounselorEmail, string CounselorName) : ICommand<BaseResponse>;
 
 internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCounselorScheduleCommand, BaseResponse>
 {
@@ -65,6 +67,8 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
             // Initialize lists for counselor schedule days and slots
             var counselorScheduleDays = new List<CounselorScheduleDay>();
             var counselorScheduleSlots = new List<CounselorScheduleSlot>();
+            var counselorScheduleDayCollections = new List<CounselorScheduleDayCollection>();
+            var counselorScheduleSlotCollections = new List<CounselorScheduleSlotCollection>();
             
             // Insert new counselor schedule
             await _counselorScheduleRepository.ExecuteInTransactionAsync(async () =>
@@ -73,7 +77,7 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
                 {
                     CounselorEmail = request.CounselorEmail,
                 };
-            
+
                 await _counselorScheduleRepository.AddAsync(newCounselorSchedule);
 
                 foreach (var day in weekdays)
@@ -94,9 +98,11 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
                             Status = ((short) ConstantEnum.ScheduleStatus.Available),
                         };
                         counselorScheduleSlots.Add(counselorScheduleSlot);
+                        counselorScheduleSlotCollections.Add(CounselorScheduleSlotMapper.ToReadModel(counselorScheduleSlot));
                     }
                 
                     counselorScheduleDays.Add(counselorScheduleDay);
+                    counselorScheduleDayCollections.Add(CounselorScheduleDayMapper.ToReadModel(counselorScheduleDay));
                 }
 
                 // Add the new counselor schedule days and slots to the repository
@@ -105,7 +111,13 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
             
                 // Save changes
                 await _counselorScheduleRepository.SaveChangesAsync(request.CounselorEmail);
-            
+                
+                _counselorScheduleRepository.Store(CounselorScheduleMapper.ToReadModel(newCounselorSchedule, request.CounselorName), "Admin");
+                _counselorScheduleDayRepository.StoreRange(counselorScheduleDayCollections,"Admin");
+                _counselorScheduleSlotRepository.StoreRange(counselorScheduleSlotCollections, "Admin");
+
+                await _counselorScheduleRepository.SessionSavechanges();
+
                 // True
                 response.Success = true;
                 response.SetMessage(MessageId.I00001);

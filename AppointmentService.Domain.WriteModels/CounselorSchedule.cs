@@ -1,11 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using Marten.Schema;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AppointmentService.Domain;
+namespace AppointmentService.Infrastructure;
 
 public partial class CounselorSchedule
 {
-    [Identity]
     public string CounselorEmail { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
@@ -18,7 +17,5 @@ public partial class CounselorSchedule
 
     public string UpdatedBy { get; set; } = null!;
 
-    [JsonIgnore]
     public virtual ICollection<CounselorScheduleDay> CounselorScheduleDays { get; set; } = new List<CounselorScheduleDay>();
 }
-

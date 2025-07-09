@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace AuthService.Domain;
+﻿namespace AuthService.Domain.WriteModels;
 
 public partial class User
 {
@@ -44,6 +42,5 @@ public partial class User
 
     public string? Key { get; set; }
     
-    [JsonIgnore]
     public virtual Role Role { get; set; } = null!;
 }

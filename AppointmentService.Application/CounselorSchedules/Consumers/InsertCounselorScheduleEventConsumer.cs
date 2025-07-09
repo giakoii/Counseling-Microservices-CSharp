@@ -1,7 +1,5 @@
 using AppointmentService.Application.CounselorSchedules.Commands;
-using BuildingBlocks.Messaging.Events;
-using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
-using Common;
+using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using MassTransit;
 using MediatR;
 
@@ -20,7 +18,7 @@ public class InsertCounselorScheduleEventConsumer: IConsumer<InsertCounselorSche
     {
         var evt = context.Message;
             
-        var command = new InsertCounselorScheduleCommand(evt.CounselorEmail);
+        var command = new InsertCounselorScheduleCommand(evt.CounselorEmail, evt.CounselorName);
             
         var response = await _mediator.Send(command);
         

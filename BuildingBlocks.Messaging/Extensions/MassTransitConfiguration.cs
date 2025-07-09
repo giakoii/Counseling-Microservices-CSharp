@@ -1,4 +1,3 @@
-using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 

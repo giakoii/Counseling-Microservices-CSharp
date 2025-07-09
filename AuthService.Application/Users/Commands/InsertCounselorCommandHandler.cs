@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
-using AuthService.Domain;
+using AuthService.Application.Mappers;
+using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
-using BuildingBlocks.Messaging.Events;
-using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
+using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common;
 using Common.Utils.Const;
 using MassTransit;
@@ -21,15 +21,18 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
 {
     private readonly ICommandRepository<User> _userRepository;
     private readonly ICommandRepository<Role> _roleRepository;
-    private readonly IPublishEndpoint _publishEndpoint;
     private readonly IRequestClient<InsertCounselorScheduleRequest> _requestClient;
-
-
-    public InsertCounselorCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, IPublishEndpoint publishEndpoint, IRequestClient<InsertCounselorScheduleRequest> requestClient)
+    
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="userRepository"></param>
+    /// <param name="roleRepository"></param>
+    /// <param name="requestClient"></param>
+    public InsertCounselorCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, IRequestClient<InsertCounselorScheduleRequest> requestClient)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
-        _publishEndpoint = publishEndpoint;
         _requestClient = requestClient;
     }
 
@@ -71,8 +74,15 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
             await _userRepository.AddAsync(newUser);
             await _userRepository.SaveChangesAsync(newUser.Email);
             
+            _userRepository.Store(UserMapper.ToReadModel(newUser), newUser.Email);
+            await _userRepository.SessionSavechanges();
+            
             // Publish event to notify other services
-            var @event = new InsertCounselorScheduleRequest { CounselorEmail = newUser.Email };
+            var @event = new InsertCounselorScheduleRequest 
+                { 
+                    CounselorEmail = newUser.Email,
+                    CounselorName = $"{newUser.FirstName} {newUser.LastName}"
+                };
 
             var responseInsertCounselorSchedule = await _requestClient.GetResponse<BaseResponse>(@event);
             

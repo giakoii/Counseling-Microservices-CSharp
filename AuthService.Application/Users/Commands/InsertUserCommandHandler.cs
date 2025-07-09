@@ -1,4 +1,5 @@
-using AuthService.Domain;
+using AuthService.Application.Mappers;
+using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
@@ -56,10 +57,14 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Bas
                 FirstName = request.FirstName,
                 RoleId = role.Id,
             };
-        
+            
             // Save changes
             await _userRepository.AddAsync(newUser);
             await _userRepository.SaveChangesAsync(newUser.Email);
+            
+            // Map user to UserWriteModel
+            _userRepository.Store(UserMapper.ToReadModel(newUser), newUser.Email);
+            await _userRepository.SessionSavechanges();
             
             response.Success = true;
             response.SetMessage(MessageId.I00001);
