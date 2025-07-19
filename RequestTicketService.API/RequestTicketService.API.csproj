@@ -11,6 +11,7 @@
         <PackageReference Include="DotNetEnv" Version="3.1.1" />
         <PackageReference Include="Marten" Version="8.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
         <PackageReference Include="NLog" Version="5.3.4" />
         <PackageReference Include="NLog.Config" Version="4.7.15" />
         <PackageReference Include="NSwag.AspNetCore" Version="14.2.0" />
