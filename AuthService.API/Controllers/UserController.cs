@@ -44,7 +44,7 @@ public class UserController : ControllerBase
     [Route("[action]")]
     public async Task<IActionResult> InsertUser([FromBody] InsertUserCommand request)
     {
-        var response = new BaseResponse { Success = false };
+        var response = new BaseCommandResponse { Success = false };
         try
         {
             response = await _mediator.Send(request);
@@ -67,7 +67,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = ConstRole.Admin, AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     public async Task<IActionResult> InsertCounselor([FromBody] InsertCounselorCommand request)
     {
-        var response = new BaseResponse { Success = false };
+        var response = new BaseCommandResponse { Success = false };
         try
         {
             response = await _mediator.Send(request);

@@ -3,9 +3,10 @@ using System.Text.Json.Serialization;
 using AppointmentService.Application.CounselorSchedules.Commands;
 using AppointmentService.Application.CounselorSchedules.Consumers;
 using AppointmentService.Application.CounselorSchedules.Queries;
-using AppointmentService.Domain;
+using AppointmentService.Domain.ReadModels;
+using AppointmentService.Domain.WriteModels;
 using AppointmentService.Infrastructure.Data.Contexts;
-using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
+using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.Utils.Const;
 using DotNetEnv;
 using JasperFx;
@@ -54,14 +55,12 @@ builder.Services.AddMarten(options =>
     options.DatabaseSchemaName = "AppointmentServiceDB_Marten";
 
     // Register all aggregate roots or document types
-    options.Schema.For<Weekday>().Identity(x => x.Id);
-    options.Schema.For<TimeSlot>().Identity(x => x.Id);
-    options.Schema.For<CounselorSchedule>().Identity(x => x.CounselorEmail);
-    options.Schema.For<CounselorScheduleDay>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleSlot>().Identity(x => x.Id);
-    options.Schema.For<Payment>().Identity(x => x.PaymentId);
-    options.Schema.For<Appointment>().Identity(x => x.AppointmentId);
-    options.Schema.For<AdmissionDocument>().Identity(x => x.DocumentId);
+    options.Schema.For<WeekdayCollection>().Identity(x => x.Id);
+    options.Schema.For<TimeSlotCollection>().Identity(x => x.Id);
+    options.Schema.For<CounselorScheduleDetailCollection>().Identity(x => x.Id);
+    options.Schema.For<PaymentCollection>().Identity(x => x.Id);
+    options.Schema.For<AppointmentCollection>().Identity(x => x.Id);
+    options.Schema.For<AdmissionDocumentCollection>().Identity(x => x.DocumentId);
 });
 
 #endregion
@@ -89,7 +88,7 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 
-    x.AddRequestClient<InsertCounselorScheduleRequest>();
+    x.AddRequestClient<UserInformationRequest>();
 });
 
 #endregion
@@ -102,7 +101,7 @@ builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepositor
 builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlRepository<>));
 
 // Specific domain entity repositories (optional if needed separately)
-builder.Services.AddScoped<ICommandRepository<CounselorSchedule>, CommandRepository<CounselorSchedule>>();
+builder.Services.AddScoped<ICommandRepository<CounselorScheduleDetail>, CommandRepository<CounselorScheduleDetail>>();
 builder.Services.AddScoped<ICommandRepository<Weekday>, CommandRepository<Weekday>>();
 builder.Services.AddScoped<ICommandRepository<TimeSlot>, CommandRepository<TimeSlot>>();
 

@@ -1,4 +1,5 @@
 using AuthService.Domain;
+using AuthService.Domain.WriteModels;
 using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Context;

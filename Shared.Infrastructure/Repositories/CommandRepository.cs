@@ -57,6 +57,28 @@ public class CommandRepository<TEntity>(AppDbContext context, IDocumentSession s
     {
        await context.AddRangeAsync(entities);
     }
+    
+    /// <summary>
+    /// Add entity to the Marten session
+    /// </summary>
+    public void Store<TCollection>(TCollection entity, string updatedBy, bool isModified = false) where TCollection : class
+    {
+        EntityMetadataHelper.SetCommonValuesForMarten(new List<object> { entity }, updatedBy, isModified);
+        session.Store(entity);
+    }
+
+    /// <summary>
+    /// Add a range of entities
+    /// </summary>
+    /// <param name="entities"></param>
+    public void StoreRange<TCollection>(List<TCollection> entities, string updatedBy, bool isModified = false) where TCollection : class
+    {
+        EntityMetadataHelper.SetCommonValuesForMarten(entities.Cast<object>().ToList(), updatedBy, isModified);
+        foreach (var entity in entities)
+        {
+            session.Store(entity);
+        }
+    }
 
     /// <summary>
     /// Update entity
@@ -74,30 +96,7 @@ public class CommandRepository<TEntity>(AppDbContext context, IDocumentSession s
     /// <exception cref="NotImplementedException"></exception>
     public int SaveChanges(string userName, bool needLogicalDelete = false)
     {
-        var entries = context.ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
-            .ToList();
-
-        var entities = entries.Select(e => e.Entity).ToList();
-
-        EntityMetadataHelper.SetCommonValuesForMarten(
-            entities,
-            userName,
-            isModified: entries.Any(e => e.State == EntityState.Modified),
-            needLogicalDelete
-        );
-
-        // Save change to EF core
-        var result = context.SaveChanges();
-
-        // Save to marten
-        foreach (var entity in entities)
-        {
-            session.Store(entity);
-        }
-
-        session.SaveChangesAsync();
-        return result;
+        return context.SaveChanges(userName, needLogicalDelete);
     }
 
     /// <summary>
@@ -108,30 +107,12 @@ public class CommandRepository<TEntity>(AppDbContext context, IDocumentSession s
     /// <exception cref="NotImplementedException"></exception>
     public async Task<int> SaveChangesAsync(string userName, bool needLogicalDelete = false)
     {
-        var entries = context.ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
-            .ToList();
-
-        var entities = entries.Select(e => e.Entity).ToList();
-
-        EntityMetadataHelper.SetCommonValuesForMarten(
-            entities,
-            userName,
-            isModified: entries.Any(e => e.State == EntityState.Modified),
-            needLogicalDelete
-        );
-
-        // Save to EF core
-        var result = await context.SaveChangesAsync();
-
-        // Save to marten
-        foreach (var entity in entities)
-        {
-            session.Store(entity);
-        }
-
+        return await context.SaveChangesAsync(userName, needLogicalDelete);
+    }
+    
+    public async Task SessionSavechanges()
+    {
         await session.SaveChangesAsync();
-        return result;
     }
 
     /// <summary>

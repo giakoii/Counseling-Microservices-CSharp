@@ -1,37 +1,25 @@
-using AppointmentService.Domain;
+using AppointmentService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
 using Common;
-using Common.Utils;
 using Common.Utils.Const;
+using MassTransit.Initializers;
 using Shared.Application.Repositories;
+using Shared.Infrastructure.Helpers;
 
 namespace AppointmentService.Application.CounselorSchedules.Queries;
 
-public record SelectCounselorSchedulesQuery() : IQuery<SelectCounselorSchedulesResponse>;
+public record SelectCounselorSchedulesQuery : IQuery<SelectCounselorSchedulesResponse>;
 
 public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselorSchedulesQuery, SelectCounselorSchedulesResponse>
 {
-    private readonly INoSqlQueryRepository<CounselorSchedule> _counselorScheduleRepository;
-    private readonly INoSqlQueryRepository<CounselorScheduleDay> _counselorScheduleDayRepository;
-    private readonly INoSqlQueryRepository<CounselorScheduleSlot> _counselorScheduleSlotRepository;
-    private readonly INoSqlQueryRepository<Weekday> _weekdayRepository;
-    private readonly INoSqlQueryRepository<TimeSlot> _timeSlotRepository;
+    private readonly INoSqlQueryRepository<CounselorScheduleDetailCollection> _counselorScheduleRepository;
 
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="counselorScheduleRepository"></param>
-    /// <param name="weekdayRepository"></param>
-    /// <param name="timeSlotRepository"></param>
-    /// <param name="counselorScheduleSlotRepository"></param>
-    /// <param name="counselorScheduleDayRepository"></param>
-    public SelectCounselorSchedulesQueryHandler(INoSqlQueryRepository<CounselorSchedule> counselorScheduleRepository, INoSqlQueryRepository<Weekday> weekdayRepository, INoSqlQueryRepository<TimeSlot> timeSlotRepository, INoSqlQueryRepository<CounselorScheduleSlot> counselorScheduleSlotRepository, INoSqlQueryRepository<CounselorScheduleDay> counselorScheduleDayRepository)
-    {
+    public SelectCounselorSchedulesQueryHandler(INoSqlQueryRepository<CounselorScheduleDetailCollection> counselorScheduleRepository){
         _counselorScheduleRepository = counselorScheduleRepository;
-        _weekdayRepository = weekdayRepository;
-        _timeSlotRepository = timeSlotRepository;
-        _counselorScheduleSlotRepository = counselorScheduleSlotRepository;
-        _counselorScheduleDayRepository = counselorScheduleDayRepository;
     }
 
     /// <summary>
@@ -47,7 +35,8 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
         try
         {
             // Get current day of the week (1 = Monday, 7 = Sunday)
-            var currentDayOfWeek = (int)DateTime.Now.DayOfWeek;
+            var currentDayOfWeek = (int) DateTime.Now.DayOfWeek;
+            
             // Convert to match your weekday system (assuming 1-7 where Monday = 1)
             var currentWeekdayId = currentDayOfWeek == 0 ? 7 : currentDayOfWeek;
             
@@ -57,61 +46,22 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
             // Retrieve all counselor schedules
             var counselorSchedules = await _counselorScheduleRepository.FindAllAsync(x => x.IsActive);
             
-            var weekdays = await _weekdayRepository.FindAllAsync();
-            
-            // Get all time slots
-            var timeSlots = await _timeSlotRepository.FindAllAsync();
-            
-            // Get schedule days for today and future days only
-            var scheduleDays = await _counselorScheduleDayRepository.FindAllAsync(x => x.WeekdayId >= currentWeekdayId);
-            
-            // Filter schedule slots for available status (status = 1)
-            var scheduleSlots = await _counselorScheduleSlotRepository.FindAllAsync(x => x.Status == 1);
-            
-            var scheduleEntities = new List<SelectCounselorSchedulesEntity>();
-            
-            foreach (var schedule in counselorSchedules)
+            // Convert to a list of SelectCounselorSchedulesEntity
+            var counselorScheduleEntities = counselorSchedules.Select(x => new SelectCounselorSchedulesEntity
             {
-                // Get schedule days for this counselor (only today and future days)
-                var counselorScheduleDays = scheduleDays.Where(x => x.CounselorEmail == schedule.CounselorEmail);
-                
-                foreach (var scheduleDay in counselorScheduleDays)
-                {
-                    // Get available time slots for this schedule day
-                    var availableTimeSlots = scheduleSlots.Where(x => x.ScheduleDayId == scheduleDay.Id);
-                    
-                    foreach (var timeSlot in availableTimeSlots)
-                    {
-                        var weekdayName = weekdays.Find(x => x.Id == scheduleDay.WeekdayId)?.DayName;
-                        var slotName = timeSlots.Find(x => x.Id == timeSlot.SlotId);
-                        
-                        if (slotName != null)
-                        {
-                            // For today: only include slots that haven't started yet
-                            // For future days: include all slots
-                            bool isToday = scheduleDay.WeekdayId == currentWeekdayId;
-                            bool isValidSlot = !isToday || slotName.StartTime > currentTime;
-                            
-                            if (isValidSlot)
-                            {
-                                var scheduleEntity = new SelectCounselorSchedulesEntity
-                                {
-                                    CounselorEmail = schedule.CounselorEmail,
-                                    DayId = scheduleDay.WeekdayId,
-                                    Day = weekdayName!,
-                                    SlotId = timeSlot.SlotId,
-                                    Slot = $"{StringUtil.ConvertToHhMm(slotName.StartTime)} - {StringUtil.ConvertToHhMm(slotName.EndTime)}",
-                                    StatusId = timeSlot.Status
-                                };
-                                scheduleEntities.Add(scheduleEntity);
-                            }
-                        }
-                    }
-                }
-            }
+                CounselorEmail = x.Counselor.Email,
+                CounselorName = $"{x.Counselor.FirstName} {x.Counselor.LastName}",
+                DayId = x.WeekdayId,
+                SlotId = x.SlotId,
+                StatusId = x.StatusId,
+                Day = x.DayName
+            }).ToList();
+            
+            // Paginate the results
+            var pagedResult = await PaginationHelper.PaginateAsync(counselorScheduleEntities.AsQueryable());
             
             // Set the response
-            response.Response = scheduleEntities;
+            response.Response = pagedResult;
             response.Success = true;
             response.SetMessage(MessageId.I00001);
         }
@@ -125,14 +75,16 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
     }
 }
 
-public class SelectCounselorSchedulesResponse : AbstractResponse<List<SelectCounselorSchedulesEntity>>
+public class SelectCounselorSchedulesResponse : AbstractResponse<PagedResult<SelectCounselorSchedulesEntity>>
 {
-    public override List<SelectCounselorSchedulesEntity> Response { get; set; }
+    public override PagedResult<SelectCounselorSchedulesEntity> Response { get; set; }
 }
 
 public class SelectCounselorSchedulesEntity
 {
     public string CounselorEmail { get; set; }
+    
+    public string CounselorName { get; set; } = null!;
 
     public string Day { get; set; }
     

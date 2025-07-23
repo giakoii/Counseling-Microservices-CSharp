@@ -1,6 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AppointmentService.Domain;
+namespace AppointmentService.Infrastructure;
 
 public partial class Appointment
 {
@@ -30,6 +31,5 @@ public partial class Appointment
 
     public string UpdatedBy { get; set; } = null!;
 
-    [JsonIgnore]
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

@@ -1,13 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AppointmentService.Domain;
+namespace AppointmentService.Infrastructure;
 
 public partial class Weekday
 {
-    public int Id { get; set; }
+    public short Id { get; set; }
 
     public string DayName { get; set; } = null!;
 
-    [JsonIgnore]
     public virtual ICollection<CounselorScheduleDay> CounselorScheduleDays { get; set; } = new List<CounselorScheduleDay>();
 }

@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace AuthService.Domain;
+﻿namespace AuthService.Domain.WriteModels;
 
 public partial class Role
 {
@@ -10,6 +8,5 @@ public partial class Role
 
     public string NormalizedName { get; set; } = null!;
     
-    [JsonIgnore]
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

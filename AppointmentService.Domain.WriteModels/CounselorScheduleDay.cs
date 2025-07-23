@@ -1,6 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AppointmentService.Domain;
+namespace AppointmentService.Infrastructure;
 
 public partial class CounselorScheduleDay
 {
@@ -8,13 +9,21 @@ public partial class CounselorScheduleDay
 
     public string CounselorEmail { get; set; } = null!;
 
-    public int WeekdayId { get; set; }
+    public short WeekdayId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = null!;
+
+    public bool IsActive { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
+    public string UpdatedBy { get; set; } = null!;
 
     public virtual CounselorSchedule CounselorEmailNavigation { get; set; } = null!;
 
-    [JsonIgnore]
     public virtual ICollection<CounselorScheduleSlot> CounselorScheduleSlots { get; set; } = new List<CounselorScheduleSlot>();
 
-    [JsonIgnore]
     public virtual Weekday Weekday { get; set; } = null!;
 }

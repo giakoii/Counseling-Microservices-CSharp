@@ -1,4 +1,5 @@
-using AuthService.Domain;
+using AuthService.Application.Mappers;
+using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
@@ -12,9 +13,9 @@ public record InsertUserCommand (
     string Password,
     string FirstName,
     string LastName
-) : ICommand<BaseResponse>;
+) : ICommand<BaseCommandResponse>;
 
-internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, BaseResponse>
+internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, BaseCommandResponse>
 {
     private readonly ICommandRepository<User> _userRepository;
     private readonly ICommandRepository<Role> _roleRepository;
@@ -25,9 +26,9 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Bas
         _roleRepository = roleRepository;
     }
 
-    public async Task<BaseResponse> Handle(InsertUserCommand request, CancellationToken cancellationToken)
+    public async Task<BaseCommandResponse> Handle(InsertUserCommand request, CancellationToken cancellationToken)
     {
-        var response = new BaseResponse {Success = false};
+        var response = new BaseCommandResponse {Success = false};
         
         // Validate email
         var emailExist = await _userRepository.Find(x => x.Email == request.Email && x.IsActive, true).FirstOrDefaultAsync(cancellationToken);
@@ -50,16 +51,21 @@ internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, Bas
             // Insert new user
             var newUser = new User
             {
+                Id = Guid.NewGuid(),
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
                 LastName = request.LastName,
                 FirstName = request.FirstName,
                 RoleId = role.Id,
             };
-        
+            
             // Save changes
             await _userRepository.AddAsync(newUser);
             await _userRepository.SaveChangesAsync(newUser.Email);
+            
+            // Map user to UserWriteModel
+            _userRepository.Store(UserMapper.ToReadModel(newUser), newUser.Email);
+            await _userRepository.SessionSavechanges();
             
             response.Success = true;
             response.SetMessage(MessageId.I00001);

@@ -1,13 +1,12 @@
 using AppointmentService.Application.CounselorSchedules.Commands;
-using BuildingBlocks.Messaging.Events;
-using BuildingBlocks.Messaging.Events.InsertCounselorSchedule;
-using Common;
+using AppointmentService.Domain.Snapshorts;
+using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using MassTransit;
 using MediatR;
 
 namespace AppointmentService.Application.CounselorSchedules.Consumers;
 
-public class InsertCounselorScheduleEventConsumer: IConsumer<InsertCounselorScheduleRequest>
+public class InsertCounselorScheduleEventConsumer: IConsumer<UserInformationRequest>
 {
     private readonly IMediator _mediator;
 
@@ -16,11 +15,18 @@ public class InsertCounselorScheduleEventConsumer: IConsumer<InsertCounselorSche
         _mediator = mediator;
     }
 
-    public async Task Consume(ConsumeContext<InsertCounselorScheduleRequest> context)
+    public async Task Consume(ConsumeContext<UserInformationRequest> context)
     {
         var evt = context.Message;
+
+        var userInf = new UserInformation
+        {
+            Email = evt.Email,
+            FirstName = evt.FirstName,
+            LastName = evt.LastName,
+        };
             
-        var command = new InsertCounselorScheduleCommand(evt.CounselorEmail);
+        var command = new InsertCounselorScheduleCommand(evt.CounselorId, userInf);
             
         var response = await _mediator.Send(command);
         

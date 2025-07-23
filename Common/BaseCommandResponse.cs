@@ -1,6 +1,6 @@
 namespace Common;
 
-public class BaseResponse : AbstractResponse<string>
+public class BaseCommandResponse : AbstractResponse<string>
 {
     public override string Response { get; set; }
 }
