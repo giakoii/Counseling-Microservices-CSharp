@@ -57,9 +57,7 @@ builder.Services.AddMarten(options =>
     // Register all aggregate roots or document types
     options.Schema.For<WeekdayCollection>().Identity(x => x.Id);
     options.Schema.For<TimeSlotCollection>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleCollection>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleDayCollection>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleSlotCollection>().Identity(x => x.Id);
+    options.Schema.For<CounselorScheduleDetailCollection>().Identity(x => x.Id);
     options.Schema.For<PaymentCollection>().Identity(x => x.Id);
     options.Schema.For<AppointmentCollection>().Identity(x => x.Id);
     options.Schema.For<AdmissionDocumentCollection>().Identity(x => x.DocumentId);
@@ -90,7 +88,7 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 
-    x.AddRequestClient<InsertCounselorScheduleRequest>();
+    x.AddRequestClient<UserInformationRequest>();
 });
 
 #endregion
@@ -103,7 +101,7 @@ builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepositor
 builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlRepository<>));
 
 // Specific domain entity repositories (optional if needed separately)
-builder.Services.AddScoped<ICommandRepository<CounselorSchedule>, CommandRepository<CounselorSchedule>>();
+builder.Services.AddScoped<ICommandRepository<CounselorScheduleDetail>, CommandRepository<CounselorScheduleDetail>>();
 builder.Services.AddScoped<ICommandRepository<Weekday>, CommandRepository<Weekday>>();
 builder.Services.AddScoped<ICommandRepository<TimeSlot>, CommandRepository<TimeSlot>>();
 

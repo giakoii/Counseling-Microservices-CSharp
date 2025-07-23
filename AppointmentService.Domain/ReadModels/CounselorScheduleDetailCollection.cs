@@ -4,7 +4,7 @@ using AppointmentService.Domain.WriteModels;
 
 namespace AppointmentService.Domain.ReadModels;
 
-public class AppointmentCollection
+public class CounselorScheduleDetailCollection
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
@@ -12,15 +12,24 @@ public class AppointmentCollection
     [JsonPropertyName("counselor_id")]
     public Guid CounselorId { get; set; }
     
-    [JsonPropertyName("user_id")]
-    public Guid UserId { get; set; }
+    [JsonPropertyName("weekday_id")]
+    public short WeekdayId { get; set; }
     
-    [JsonPropertyName("appointment_date")]
-    public DateOnly AppointmentDate { get; set; }
+    [JsonPropertyName("day_name")]
+    public string DayName { get; set; } = null!;
 
-    [JsonPropertyName("status")]
-    public short Status { get; set; }
-
+    [JsonPropertyName("slot_id")]
+    public short SlotId { get; set; }
+    
+    [JsonPropertyName("start_time")]
+    public TimeOnly StartTime { get; set; }
+    
+    [JsonPropertyName("end_time")]
+    public TimeOnly EndTime { get; set; }
+    
+    [JsonPropertyName("status_id")]
+    public short StatusId { get; set; }
+    
     [JsonPropertyName("created_at")]
     public DateTime CreatedAt { get; set; }
 
@@ -37,29 +46,26 @@ public class AppointmentCollection
     public string UpdatedBy { get; set; } = null!;
     
     public UserInformation Counselor { get; set; } = null!;
-    
-    public UserInformation User { get; set; } = null!;
-    
-    public static AppointmentCollection FromWriteModel(Appointment model, UserInformation userInformation, bool includeRelated = false)
+
+    public static CounselorScheduleDetailCollection FromWriteModel(CounselorScheduleDetail model, UserInformation userInformation)
     {
-        var result = new AppointmentCollection
+        var result = new CounselorScheduleDetailCollection
         {
-            Id = model.AppointmentId,
+            Id = model.Id,
             CounselorId = model.CounselorId,
-            AppointmentDate = model.AppointmentDate,
-            Status = model.StatusId ?? 1,
             CreatedAt = model.CreatedAt,
             CreatedBy = model.CreatedBy,
             IsActive = model.IsActive,
             UpdatedAt = model.UpdatedAt,
             UpdatedBy = model.UpdatedBy,
-            Counselor = userInformation
+            Counselor = userInformation,
+            WeekdayId = model.WeekdayId,
+            DayName = model.Weekday.DayName,
+            SlotId = model.SlotId,
+            StartTime = model.Slot.StartTime,
+            EndTime = model.Slot.EndTime,
+            StatusId = model.Status,
         };
-
-        if (includeRelated)
-        {
-            result.User = userInformation;
-        }
 
         return result;
     }

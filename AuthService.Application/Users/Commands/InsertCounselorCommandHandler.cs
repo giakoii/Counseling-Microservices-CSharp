@@ -15,13 +15,13 @@ public record InsertCounselorCommand(
     string Email,
     string FirstName,
     string LastName
-) : ICommand<BaseResponse>;
+) : ICommand<BaseCommandResponse>;
 
-public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorCommand, BaseResponse>
+public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorCommand, BaseCommandResponse>
 {
     private readonly ICommandRepository<User> _userRepository;
     private readonly ICommandRepository<Role> _roleRepository;
-    private readonly IRequestClient<InsertCounselorScheduleRequest> _requestClient;
+    private readonly IRequestClient<UserInformationRequest> _requestClient;
     
     /// <summary>
     /// Constructor
@@ -29,16 +29,16 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
     /// <param name="userRepository"></param>
     /// <param name="roleRepository"></param>
     /// <param name="requestClient"></param>
-    public InsertCounselorCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, IRequestClient<InsertCounselorScheduleRequest> requestClient)
+    public InsertCounselorCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, IRequestClient<UserInformationRequest> requestClient)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
         _requestClient = requestClient;
     }
 
-    public async Task<BaseResponse> Handle(InsertCounselorCommand request, CancellationToken cancellationToken)
+    public async Task<BaseCommandResponse> Handle(InsertCounselorCommand request, CancellationToken cancellationToken)
     {
-        var response = new BaseResponse {Success = false};
+        var response = new BaseCommandResponse {Success = false};
         
         // Validate email
         var emailExist = await _userRepository.Find(x => x.Email == request.Email && x.IsActive).FirstOrDefaultAsync(cancellationToken);
@@ -49,7 +49,7 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
         }
 
         // Check role in the database
-        var role = await _roleRepository.Find(x => x.Name == ConstantEnum.Role.Consultant.ToString()).FirstOrDefaultAsync(cancellationToken);
+        var role = await _roleRepository.Find(x => x.Name == nameof(ConstantEnum.Role.Consultant)).FirstOrDefaultAsync(cancellationToken);
         if (role == null)
         {
             response.SetMessage(MessageId.E99999);
@@ -63,6 +63,7 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
             // Insert new user
             var newUser = new User
             {
+                Id = Guid.NewGuid(),
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12),
                 LastName = request.LastName,
@@ -78,15 +79,17 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
             await _userRepository.SessionSavechanges();
             
             // Publish event to notify other services
-            var @event = new InsertCounselorScheduleRequest 
+            var @event = new UserInformationRequest 
                 { 
-                    CounselorEmail = newUser.Email,
-                    CounselorName = $"{newUser.FirstName} {newUser.LastName}"
+                    Email = newUser.Email,
+                    FirstName = newUser.FirstName,
+                    CounselorId = newUser.Id,
+                    LastName = newUser.LastName,
                 };
 
-            var responseInsertCounselorSchedule = await _requestClient.GetResponse<BaseResponse>(@event);
+            var responseInsertCounselorSchedule = await _requestClient.GetResponse<BaseCommandResponse>(@event, cancellationToken);
             
-            // If response from InsertCounselorScheduleRequest is not successful, set error message
+            // If response from UserInformationRequest is not successful, set error message
             if (!responseInsertCounselorSchedule.Message.Success)
             {
                 response.SetMessage(MessageId.E99999);

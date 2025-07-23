@@ -2,7 +2,9 @@ using AppointmentService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
+using MassTransit.Initializers;
 using Shared.Application.Repositories;
+using Shared.Infrastructure.Helpers;
 
 namespace AppointmentService.Application.CounselorSchedules.Queries;
 
@@ -10,13 +12,13 @@ public record SelectCounselorSchedulesQuery : IQuery<SelectCounselorSchedulesRes
 
 public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselorSchedulesQuery, SelectCounselorSchedulesResponse>
 {
-    private readonly INoSqlQueryRepository<CounselorScheduleCollection> _counselorScheduleRepository;
+    private readonly INoSqlQueryRepository<CounselorScheduleDetailCollection> _counselorScheduleRepository;
 
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="counselorScheduleRepository"></param>
-    public SelectCounselorSchedulesQueryHandler(INoSqlQueryRepository<CounselorScheduleCollection> counselorScheduleRepository){
+    public SelectCounselorSchedulesQueryHandler(INoSqlQueryRepository<CounselorScheduleDetailCollection> counselorScheduleRepository){
         _counselorScheduleRepository = counselorScheduleRepository;
     }
 
@@ -33,7 +35,7 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
         try
         {
             // Get current day of the week (1 = Monday, 7 = Sunday)
-            var currentDayOfWeek = (int)DateTime.Now.DayOfWeek;
+            var currentDayOfWeek = (int) DateTime.Now.DayOfWeek;
             
             // Convert to match your weekday system (assuming 1-7 where Monday = 1)
             var currentWeekdayId = currentDayOfWeek == 0 ? 7 : currentDayOfWeek;
@@ -44,56 +46,22 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
             // Retrieve all counselor schedules
             var counselorSchedules = await _counselorScheduleRepository.FindAllAsync(x => x.IsActive);
             
-            var scheduleEntities = new List<SelectCounselorSchedulesEntity>();
-            
-            foreach (var schedule in counselorSchedules)
+            // Convert to a list of SelectCounselorSchedulesEntity
+            var counselorScheduleEntities = counselorSchedules.Select(x => new SelectCounselorSchedulesEntity
             {
-                // Loop through each day in the schedule
-                foreach (var scheduleDay in schedule.ScheduleDays.Where(d => d.IsActive))
-                {
-                    // Loop through each slot in the day
-                    foreach (var slot in scheduleDay.Slots.Where(s => s.IsActive))
-                    {
-                        // Parse slot start time
-                        if (!TimeOnly.TryParse(slot.StartTime, out var slotStartTime))
-                            continue;
-                        
-                        // Filter logic: only include slots that are in the future
-                        bool shouldIncludeSlot = false;
-                        
-                        if (scheduleDay.WeekDay > currentWeekdayId)
-                        {
-                            // Future day - include all slots
-                            shouldIncludeSlot = true;
-                        }
-                        else if (scheduleDay.WeekDay == currentWeekdayId)
-                        {
-                            // Same day - only include slots after current time
-                            shouldIncludeSlot = slotStartTime > currentTime;
-                        }
-                        // scheduleDay.WeekDay < currentWeekdayId means past day - skip
-                        
-                        if (shouldIncludeSlot)
-                        {
-                            var entityResponse = new SelectCounselorSchedulesEntity
-                            {
-                                CounselorEmail = schedule.CounselorEmail,
-                                CounselorName = schedule.CounselorName,
-                                Day = scheduleDay.WeekDayName,
-                                DayId = scheduleDay.WeekDay,
-                                Slot = $"{slot.StartTime} - {slot.EndTime}",
-                                SlotId = slot.TimeSlotId,
-                                StatusId = slot.IsAvailable ? (short?)1 : (short?)0 // Assuming 1 = Available, 0 = Not Available
-                            };
-                            
-                            scheduleEntities.Add(entityResponse);
-                        }
-                    }
-                }
-            }
+                CounselorEmail = x.Counselor.Email,
+                CounselorName = $"{x.Counselor.FirstName} {x.Counselor.LastName}",
+                DayId = x.WeekdayId,
+                SlotId = x.SlotId,
+                StatusId = x.StatusId,
+                Day = x.DayName
+            }).ToList();
+            
+            // Paginate the results
+            var pagedResult = await PaginationHelper.PaginateAsync(counselorScheduleEntities.AsQueryable());
             
             // Set the response
-            response.Response = scheduleEntities;
+            response.Response = pagedResult;
             response.Success = true;
             response.SetMessage(MessageId.I00001);
         }
@@ -107,22 +75,22 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
     }
 }
 
-public class SelectCounselorSchedulesResponse : AbstractResponse<List<SelectCounselorSchedulesEntity>>
+public class SelectCounselorSchedulesResponse : AbstractResponse<PagedResult<SelectCounselorSchedulesEntity>>
 {
-    public override List<SelectCounselorSchedulesEntity> Response { get; set; }
+    public override PagedResult<SelectCounselorSchedulesEntity> Response { get; set; }
 }
 
 public class SelectCounselorSchedulesEntity
 {
-    public required string CounselorEmail { get; set; }
+    public string CounselorEmail { get; set; }
     
     public string CounselorName { get; set; } = null!;
 
-    public required string Day { get; set; }
+    public string Day { get; set; }
     
     public int DayId { get; set; }
     
-    public required string Slot { get; set; }
+    public string Slot { get; set; }
     
     public int SlotId { get; set; }
     

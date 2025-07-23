@@ -1,12 +1,16 @@
 ﻿namespace AppointmentService.Domain.WriteModels;
 
-public partial class CounselorScheduleDay
+public partial class CounselorScheduleDetail
 {
     public Guid Id { get; set; }
 
-    public string CounselorEmail { get; set; } = null!;
+    public Guid CounselorId { get; set; }
 
     public short WeekdayId { get; set; }
+
+    public short SlotId { get; set; }
+
+    public short Status { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -18,9 +22,7 @@ public partial class CounselorScheduleDay
 
     public string UpdatedBy { get; set; } = null!;
 
-    public virtual CounselorSchedule CounselorEmailNavigation { get; set; } = null!;
-
-    public virtual ICollection<CounselorScheduleSlot> CounselorScheduleSlots { get; set; } = new List<CounselorScheduleSlot>();
+    public virtual TimeSlot Slot { get; set; } = null!;
 
     public virtual Weekday Weekday { get; set; } = null!;
 }
