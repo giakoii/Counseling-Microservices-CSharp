@@ -8,7 +8,7 @@ using RequestTicketService.Application.Queries;
 namespace RequestTicketService.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/request-tickets")]
     public class RequestTicketsController : ControllerBase
     {
         private readonly ICommandHandler<CreateRequestTicketCommand, Guid> _createTicketHandler;
@@ -44,7 +44,7 @@ namespace RequestTicketService.API.Controllers
             return CreatedAtAction(nameof(GetTicket), new { ticketId }, ticketId);
         }
 
-        [HttpGet("{ticketId:guid}")]
+        [HttpGet("{Id}")]
         [ProducesResponseType(typeof(RequestTicketDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTicket(Guid ticketId)
         {
@@ -61,7 +61,7 @@ namespace RequestTicketService.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{ticketId:guid}")]
+        [HttpPut("{Id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateTicket(
@@ -76,19 +76,19 @@ namespace RequestTicketService.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("{ticketId:guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteTicket(
-            Guid ticketId,
-            [FromBody] DeleteRequestTicketCommand command
-        )
-        {
-            if (ticketId != command.TicketId)
-                return BadRequest("TicketId mismatch");
+        //[HttpDelete("{Id}")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<IActionResult> DeleteTicket(
+        //    Guid ticketId,
+        //    [FromBody] DeleteRequestTicketCommand command
+        //)
+        //{
+        //    if (ticketId != command.TicketId)
+        //        return BadRequest("TicketId mismatch");
 
-            await _deleteTicketHandler.Handle(command, CancellationToken.None);
-            return Ok();
-        }
+        //    await _deleteTicketHandler.Handle(command, CancellationToken.None);
+        //    return Ok();
+        //}
     }
 }
