@@ -12,8 +12,10 @@ namespace RequestTicketService.API.Controllers
     public class RequestTicketsController : ControllerBase
     {
         private readonly ICommandHandler<CreateRequestTicketCommand, Guid> _createTicketHandler;
-        private readonly ICommandHandler<AddRequestTicketChatCommand, Guid> _addChatHandler;
         private readonly IQueryHandler<GetRequestTicketQuery, RequestTicketDto> _getTicketHandler;
+        private readonly ICommandHandler<UpdateRequestTicketCommand, bool> _updateTicketHandler;
+        private readonly ICommandHandler<DeleteRequestTicketCommand, bool> _deleteTicketHandler;
+
         private readonly IQueryHandler<
             GetRequestTicketsQuery,
             IEnumerable<RequestTicketDto>
@@ -21,15 +23,17 @@ namespace RequestTicketService.API.Controllers
 
         public RequestTicketsController(
             ICommandHandler<CreateRequestTicketCommand, Guid> createTicketHandler,
-            ICommandHandler<AddRequestTicketChatCommand, Guid> addChatHandler,
             IQueryHandler<GetRequestTicketQuery, RequestTicketDto> getTicketHandler,
-            IQueryHandler<GetRequestTicketsQuery, IEnumerable<RequestTicketDto>> getTicketsHandler
+            IQueryHandler<GetRequestTicketsQuery, IEnumerable<RequestTicketDto>> getTicketsHandler,
+            ICommandHandler<UpdateRequestTicketCommand, bool> updateTicketHandler,
+            ICommandHandler<DeleteRequestTicketCommand, bool> deleteTicketHandler
         )
         {
             _createTicketHandler = createTicketHandler;
-            _addChatHandler = addChatHandler;
             _getTicketHandler = getTicketHandler;
             _getTicketsHandler = getTicketsHandler;
+            _updateTicketHandler = updateTicketHandler;
+            _deleteTicketHandler = deleteTicketHandler;
         }
 
         [HttpPost]
@@ -57,16 +61,34 @@ namespace RequestTicketService.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{ticketId:guid}/chats")]
-        [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
-        public async Task<IActionResult> AddChat(
+        [HttpPut("{ticketId:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateTicket(
             Guid ticketId,
-            [FromBody] AddRequestTicketChatCommand command
+            [FromBody] UpdateRequestTicketCommand command
         )
         {
-            command.TicketId = ticketId;
-            var chatId = await _addChatHandler.Handle(command, CancellationToken.None);
-            return Created(string.Empty, chatId);
+            if (ticketId != command.TicketId)
+                return BadRequest("TicketId mismatch");
+
+            await _updateTicketHandler.Handle(command, CancellationToken.None);
+            return Ok();
+        }
+
+        [HttpDelete("{ticketId:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteTicket(
+            Guid ticketId,
+            [FromBody] DeleteRequestTicketCommand command
+        )
+        {
+            if (ticketId != command.TicketId)
+                return BadRequest("TicketId mismatch");
+
+            await _deleteTicketHandler.Handle(command, CancellationToken.None);
+            return Ok();
         }
     }
 }

@@ -14,6 +14,8 @@ using RequestTicketService.Application.Dtos;
 using RequestTicketService.Application.Queries;
 using RequestTicketService.Application.Queries.Handlers;
 using RequestTicketService.Infrastructure.Data.Contexts;
+using Shared.Application.Repositories;
+using Shared.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,10 +55,7 @@ builder.Services.AddOpenApiDocument(config =>
         }
     );
 });
-builder.Services.AddScoped<
-    ICommandHandler<AddRequestTicketChatCommand, Guid>,
-    AddRequestTicketChatCommandHandler
->();
+
 builder.Services.AddScoped<
     IQueryHandler<GetRequestTicketQuery, RequestTicketDto>,
     GetRequestTicketQueryHandler
@@ -69,6 +68,20 @@ builder.Services.AddScoped<
     ICommandHandler<CreateRequestTicketCommand, Guid>,
     CreateRequestTicketCommandHandler
 >();
+builder.Services.AddScoped<
+    ICommandHandler<UpdateRequestTicketCommand, bool>,
+    UpdateRequestTicketCommandHandler
+>();
+builder.Services.AddScoped<
+    ICommandHandler<DeleteRequestTicketCommand, bool>,
+    DeleteRequestTicketCommandHandler
+>();
+builder.Services.AddScoped<Shared.Infrastructure.Context.AppDbContext>(sp =>
+    sp.GetRequiredService<RequestTicketServiceContext>()
+);
+
+builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
+builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
 
 // Allow API to be read from outside
 builder.Services.AddCors(options =>
