@@ -15,5 +15,6 @@ namespace RequestTicketService.Application.Queries
         public short? StatusId { get; set; }
         public int? Page { get; set; }
         public int? PageSize { get; set; }
+        public Guid TicketId { get; set; }
     }
 }

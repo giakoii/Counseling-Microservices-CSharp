@@ -12,7 +12,7 @@ namespace RequestTicketService.API.Controllers
     public class RequestTicketsController : ControllerBase
     {
         private readonly ICommandHandler<CreateRequestTicketCommand, Guid> _createTicketHandler;
-        private readonly IQueryHandler<GetRequestTicketQuery, RequestTicketDto> _getTicketHandler;
+        private readonly IQueryHandler<GetRequestTicketIdQuery, RequestTicketDto> _getTicketHandler;
         private readonly ICommandHandler<UpdateRequestTicketCommand, bool> _updateTicketHandler;
         private readonly ICommandHandler<DeleteRequestTicketCommand, bool> _deleteTicketHandler;
 
@@ -23,7 +23,7 @@ namespace RequestTicketService.API.Controllers
 
         public RequestTicketsController(
             ICommandHandler<CreateRequestTicketCommand, Guid> createTicketHandler,
-            IQueryHandler<GetRequestTicketQuery, RequestTicketDto> getTicketHandler,
+            IQueryHandler<GetRequestTicketIdQuery, RequestTicketDto> getTicketHandler,
             IQueryHandler<GetRequestTicketsQuery, IEnumerable<RequestTicketDto>> getTicketsHandler,
             ICommandHandler<UpdateRequestTicketCommand, bool> updateTicketHandler,
             ICommandHandler<DeleteRequestTicketCommand, bool> deleteTicketHandler
@@ -48,7 +48,7 @@ namespace RequestTicketService.API.Controllers
         [ProducesResponseType(typeof(RequestTicketDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTicket(Guid ticketId)
         {
-            var query = new GetRequestTicketQuery { TicketId = ticketId };
+            var query = new GetRequestTicketIdQuery { TicketId = ticketId };
             var result = await _getTicketHandler.Handle(query, CancellationToken.None);
             return Ok(result);
         }

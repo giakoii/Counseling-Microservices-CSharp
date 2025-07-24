@@ -8,7 +8,7 @@ using RequestTicketService.Application.Dtos;
 
 namespace RequestTicketService.Application.Queries
 {
-    public class GetRequestTicketQuery : IQuery<RequestTicketDto>
+    public class GetRequestTicketIdQuery : IQuery<RequestTicketDto>
     {
         public Guid TicketId { get; set; }
     }

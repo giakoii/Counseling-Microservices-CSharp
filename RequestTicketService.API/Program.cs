@@ -57,12 +57,12 @@ builder.Services.AddOpenApiDocument(config =>
 });
 
 builder.Services.AddScoped<
-    IQueryHandler<GetRequestTicketQuery, RequestTicketDto>,
-    GetRequestTicketQueryHandler
+    IQueryHandler<GetRequestTicketIdQuery, RequestTicketDto>,
+    RequestTicketQueryHandler
 >();
 builder.Services.AddScoped<
     IQueryHandler<GetRequestTicketsQuery, IEnumerable<RequestTicketDto>>,
-    GetRequestTicketsQueryHandler
+    RequestTicketQueryHandler
 >();
 builder.Services.AddScoped<
     ICommandHandler<CreateRequestTicketCommand, Guid>,
