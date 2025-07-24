@@ -44,7 +44,7 @@ namespace RequestTicketService.API.Controllers
             return CreatedAtAction(nameof(GetTicket), new { ticketId }, ticketId);
         }
 
-        [HttpGet("{Id}")]
+        [HttpGet("{ticketId:guid}")]
         [ProducesResponseType(typeof(RequestTicketDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTicket(Guid ticketId)
         {
@@ -61,7 +61,7 @@ namespace RequestTicketService.API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{Id}")]
+        [HttpPut("{ticketId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateTicket(
