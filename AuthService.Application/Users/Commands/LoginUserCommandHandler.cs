@@ -4,7 +4,7 @@ using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace AuthService.Application.Users.Commands;
 

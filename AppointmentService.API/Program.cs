@@ -15,10 +15,11 @@ using MassTransit;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Validation.AspNetCore;
-using Shared.Application.Repositories;
 using Shared.Infrastructure.Context;
 using Shared.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Interfaces;
+using Shared.Infrastructure.Logics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,7 +94,11 @@ builder.Services.AddMassTransit(x =>
 
 #endregion
 
-#region Repository Registrations
+#region Registrations
+builder.Services.AddHttpContextAccessor();
+
+// Register application services
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 // Generic repository registrations
 builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Marten;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace Shared.Infrastructure.Repositories;
 

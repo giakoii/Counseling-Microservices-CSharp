@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Marten;
 using Microsoft.EntityFrameworkCore;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Context;
 
 namespace Shared.Infrastructure.Repositories;

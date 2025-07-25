@@ -7,7 +7,7 @@ using Common;
 using Common.Utils.Const;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace AuthService.Application.Users.Commands;
 

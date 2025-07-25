@@ -2,7 +2,7 @@ using AuthService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.Utils.Const;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace AuthService.Application.Users.Queries;
 
