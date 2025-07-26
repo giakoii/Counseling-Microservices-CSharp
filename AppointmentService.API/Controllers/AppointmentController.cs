@@ -1,6 +1,7 @@
 using AppointmentService.Application.Appointments.Commands;
 using AppointmentService.Application.Appointments.Queries;
 using Common;
+using Common.Utils.Const;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,11 @@ public class AppointmentController : ControllerBase
         _mediator = mediator;
     }
     
+    /// <summary>
+    /// Insert a new appointment.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("create")]
     public async Task<IActionResult> InsertAppointment([FromBody] AppointmentInsertCommand request)
     {
@@ -48,6 +54,10 @@ public class AppointmentController : ControllerBase
         return BadRequest(result);
     }
     
+    /// <summary>
+    /// Select all appointments.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<IActionResult> SelectAppointmentsAsync()
     {
@@ -60,5 +70,30 @@ public class AppointmentController : ControllerBase
         return BadRequest(result);
     }
     
-    
+    /// <summary>
+    /// Update the status of an appointment.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> UpdateAppointmentStatusAsync([FromRoute] Guid id, [FromBody] AppointmentUpdateStatusCommand request)
+    {
+        var response = new BaseCommandResponse { Success = false };
+        request.AppointmentId = id;
+
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        response = await _mediator.Send(request);
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+        
+        return BadRequest(response);
+    }
 }

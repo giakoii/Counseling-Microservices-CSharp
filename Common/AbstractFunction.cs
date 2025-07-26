@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Common.Utils;
+using Common.Utils.Const;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Common;
@@ -54,6 +55,7 @@ public class AbstractFunction<U, V> where U : AbstractResponse<V>
             detailError.field = StringUtil.ToLowerCase(detailError.field);
 
             // Set the error message
+            detailError.MessageId = MessageId.E00000;
             detailError.ErrorMessage = errorMessage;
 
             detailErrorList.Add(detailError);

@@ -13,7 +13,7 @@ public class AppointmentSelectsQuery : IQuery<AppointmentSelectsQueryResponse>
 }
 
 /// <summary>
-/// AppointmentSelectsQueryHandler - Handles the retrieval of appointment selections.
+/// AppointmentSelectsQueryHandler - Handles the retrieval of appointment selections by user or counselor.
 /// </summary>
 public class AppointmentSelectsQueryHandler : IQueryHandler<AppointmentSelectsQuery, AppointmentSelectsQueryResponse>
 {
@@ -39,6 +39,12 @@ public class AppointmentSelectsQueryHandler : IQueryHandler<AppointmentSelectsQu
         
         // Select all appointments by user
         var appointments = await _appointmentRepository.FindAllAsync(x => x.UserId == Guid.Parse(currentUser.UserId) && x.IsActive);
+        if (!appointments.Any())
+        {
+            // If no appointments found for user, check if the user is a counselor
+            appointments = await _appointmentRepository.FindAllAsync(x => x.CounselorId == Guid.Parse(currentUser.UserId) && x.IsActive);
+        }
+        
         if (!appointments.Any())
         {
             response.SetMessage(MessageId.I00000, "No appointments found for the user.");
