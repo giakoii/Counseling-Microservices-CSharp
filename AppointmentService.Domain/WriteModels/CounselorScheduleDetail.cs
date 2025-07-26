@@ -22,6 +22,8 @@ public partial class CounselorScheduleDetail
 
     public string UpdatedBy { get; set; } = null!;
 
+    public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+
     public virtual TimeSlot Slot { get; set; } = null!;
 
     public virtual Weekday Weekday { get; set; } = null!;

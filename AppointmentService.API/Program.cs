@@ -124,7 +124,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddOpenIddict()
     .AddValidation(options =>
     {
-        options.SetIssuer($"https://localhost:5001/");
+        options.SetIssuer($"http://localhost:5050/");
         options.AddAudiences("service_client");
 
         options.UseIntrospection()
@@ -199,6 +199,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UsePathBase("/appointments");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

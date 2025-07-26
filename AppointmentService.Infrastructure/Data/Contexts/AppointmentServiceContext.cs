@@ -20,7 +20,7 @@ public partial class AppointmentServiceContext : AppDbContext
     public virtual DbSet<Appointment> Appointments { get; set; }
 
     public virtual DbSet<CounselorScheduleDetail> CounselorScheduleDetails { get; set; }
-    
+
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<TimeSlot> TimeSlots { get; set; }
@@ -36,7 +36,7 @@ public partial class AppointmentServiceContext : AppDbContext
             var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("Missing AppointmentServiceDB environment variable");
+                throw new InvalidOperationException("Missing CONNECTION_STRING environment variable");
 
             optionsBuilder.UseNpgsql(connectionString);
         }
@@ -114,6 +114,11 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("updated_by");
+
+            entity.HasOne(d => d.Schedule).WithMany(p => p.Appointments)
+                .HasForeignKey(d => d.ScheduleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_schedule");
         });
 
         modelBuilder.Entity<CounselorScheduleDetail>(entity =>
@@ -157,7 +162,7 @@ public partial class AppointmentServiceContext : AppDbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_weekday");
         });
-        
+
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.HasKey(e => e.PaymentId).HasName("payments_pkey");

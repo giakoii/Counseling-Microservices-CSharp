@@ -68,6 +68,8 @@ builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlReposito
 builder.Services.AddScoped<ICommandRepository<User>, CommandRepository<User>>();
 builder.Services.AddScoped<ICommandRepository<Role>, CommandRepository<Role>>();
 
+builder.Services.AddHttpContextAccessor();
+
 // Add MassTransit with RabbitMQ
 // Configure messaging with RabbitMQ
 builder.Services.AddMassTransit(x =>
@@ -198,6 +200,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors();
 app.UseDeveloperExceptionPage(); 
+app.UsePathBase("/auth");
 app.UseRouting();
 app.UseAuthentication();
 app.UseStatusCodePages(); 

@@ -14,9 +14,8 @@ public static class PaginationHelper
             PageSize = pageSize,
             TotalRecords = query.Count(),
             Items = (query
-                    .Skip((pageNumber) * pageSize)
+                    .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize).ToList())
-                .ToList()
         };
 
         return result;

@@ -1,6 +1,10 @@
 using AppointmentService.Application.Appointments.Commands;
+using AppointmentService.Application.Appointments.Queries;
+using Common;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Validation.AspNetCore;
 
 namespace AppointmentService.API.Controllers;
 
@@ -9,6 +13,7 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/appointment")]
+[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class AppointmentController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -25,13 +30,35 @@ public class AppointmentController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> InsertAppointment([FromBody] AppointmentInsertCommand request)
     {
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            return BadRequest(new BaseCommandResponse
+            {
+                Success = false,
+                DetailErrorList = errorList
+            });
+        }
         var result = await _mediator.Send(request);
         if (result.Success)
         {
-            return CreatedAtAction(result.Response, result);
+            return Created(result.Response, result);
         }
         
-        return Ok(new { Message = "This endpoint will return appointments." });
+        return BadRequest(result);
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> SelectAppointmentsAsync()
+    {
+        var result = await _mediator.Send(new AppointmentSelectsQuery());
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
+    
     
 }
