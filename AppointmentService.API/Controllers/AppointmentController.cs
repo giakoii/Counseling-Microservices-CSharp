@@ -36,22 +36,20 @@ public class AppointmentController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> InsertAppointment([FromBody] AppointmentInsertCommand request)
     {
+        var response = new BaseCommandResponse { Success = false };
         var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
         if (errorList.Count > 0)
         {
-            return BadRequest(new BaseCommandResponse
-            {
-                Success = false,
-                DetailErrorList = errorList
-            });
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
         }
-        var result = await _mediator.Send(request);
-        if (result.Success)
+        response = await _mediator.Send(request);
+        if (response.Success)
         {
-            return Created(result.Response, result);
+            return Created(response.Response, response);
         }
         
-        return BadRequest(result);
+        return BadRequest(response);
     }
     
     /// <summary>
