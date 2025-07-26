@@ -136,6 +136,27 @@ public class UserController : ControllerBase
         }
         return Ok(result);
     }
+    
+    [HttpPatch("[action]")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand request)
+    {
+        var response = new BaseCommandResponse { Success = false };
+        try
+        {
+            response = await _mediator.Send(request);
+            if (response.MessageId == MessageId.E11001)
+            {
+                return Unauthorized(response);
+            }
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            response.SetMessage(MessageId.E99999);
+            return BadRequest(response);
+        }
+    }
 
     /// <summary>
     /// Exchange token
