@@ -13,4 +13,8 @@ public class ConstEnv
     public const string ChatServiceDB = "CHAT_SERVICE_DB";
     
     public const string FeedBackServiceDB = "FEEDBACK_SERVICE_DB";
+    
+    public const string MailFrom = "ecoquest.travel.exe201@gmail.com";
+    
+    public const string MailPassword = "gequ fakj nzwx fika";
 }

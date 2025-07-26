@@ -21,19 +21,22 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
 {
     private readonly ICommandRepository<User> _userRepository;
     private readonly ICommandRepository<Role> _roleRepository;
+    private readonly ISendmailService _sendmailService;
     private readonly IRequestClient<UserInformationRequest> _requestClient;
-    
+
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="userRepository"></param>
     /// <param name="roleRepository"></param>
     /// <param name="requestClient"></param>
-    public InsertCounselorCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, IRequestClient<UserInformationRequest> requestClient)
+    /// <param name="sendmailService"></param>
+    public InsertCounselorCommandHandler(ICommandRepository<User> userRepository, ICommandRepository<Role> roleRepository, IRequestClient<UserInformationRequest> requestClient, ISendmailService sendmailService)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
         _requestClient = requestClient;
+        _sendmailService = sendmailService;
     }
 
     public async Task<BaseCommandResponse> Handle(InsertCounselorCommand request, CancellationToken cancellationToken)
@@ -95,6 +98,15 @@ public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorComm
                 response.SetMessage(MessageId.E99999);
                 return false;
             }
+            
+            // Send email notification
+            var emailConfig = new SendmailConfig
+            {
+                MailFrom = ConstEnv.MailFrom,
+                MailPassword = ConstEnv.MailPassword,
+            };
+            
+            _sendmailService.SendCounselorCreationEmail(newUser.Email, password, emailConfig);
             
             response.Success = true;
             response.SetMessage(MessageId.I00001);
