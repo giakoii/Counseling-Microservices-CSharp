@@ -39,7 +39,7 @@ Context:
 
 User Question: {chatRequest}
 
-Please provide a helpful answer based only on the context provided above.";
+Please provide a helpful answer based only on the context provided above. And please answer in Vietnames";
 
                 var requestBody = new
                 {
