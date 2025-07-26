@@ -45,7 +45,7 @@ public class PaymentCollection
     public AppointmentCollection Appointment { get; set; } = null!;
     public UserInformation User { get; set; } = null!;
 
-    public static PaymentCollection FromWriteModel(Payment model, UserInformation user, bool includeAppointment = false)
+    public static PaymentCollection FromWriteModel(Payment model, AppointmentCollection appointment, bool includeAppointment = false)
     {
         var collection = new PaymentCollection
         {
@@ -61,13 +61,8 @@ public class PaymentCollection
             UpdatedBy = model.UpdatedBy,
             UserId = model.Appointment.StudentId,
             AppointmentId = model.AppointmentId,
-            Appointment = AppointmentCollection.FromWriteModel(model.Appointment, user)
+            Appointment = appointment,
         };
-
-        if (includeAppointment)
-        {
-            collection.User = user;
-        }
 
         return collection;
     }

@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Appointments\Queries\" />
+      <Folder Include="PaymentServices\" />
     </ItemGroup>
 
 </Project>

@@ -40,7 +40,7 @@ public class AppointmentCollection
     
     public UserInformation User { get; set; } = null!;
     
-    public static AppointmentCollection FromWriteModel(Appointment model, UserInformation userInformation, bool includeRelated = false)
+    public static AppointmentCollection FromWriteModel(Appointment model, UserInformation counselorInf, UserInformation userInf, bool includeRelated = false)
     {
         var result = new AppointmentCollection
         {
@@ -53,13 +53,10 @@ public class AppointmentCollection
             IsActive = model.IsActive,
             UpdatedAt = model.UpdatedAt,
             UpdatedBy = model.UpdatedBy,
-            Counselor = userInformation
+            Counselor = counselorInf,
+            User = userInf,
+            UserId = userInf.Id
         };
-
-        if (includeRelated)
-        {
-            result.User = userInformation;
-        }
 
         return result;
     }

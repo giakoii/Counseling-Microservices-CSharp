@@ -17,7 +17,7 @@
         </PackageReference>
         <PackageReference Include="NLog" Version="5.3.4" />
         <PackageReference Include="NLog.Config" Version="4.7.15" />
-        <PackageReference Include="NSwag.AspNetCore" Version="14.2.0" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
         <PackageReference Include="NSwag.MSBuild" Version="14.2.0">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>

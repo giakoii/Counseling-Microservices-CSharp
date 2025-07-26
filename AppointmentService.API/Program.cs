@@ -12,6 +12,7 @@ using DotNetEnv;
 using JasperFx;
 using Marten;
 using MassTransit;
+using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Validation.AspNetCore;
@@ -124,7 +125,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddOpenIddict()
     .AddValidation(options =>
     {
-        options.SetIssuer($"https://localhost:5001/");
+        options.SetIssuer($"http://localhost:5050/");
         options.AddAudiences("service_client");
 
         options.UseIntrospection()
@@ -164,6 +165,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 #endregion
 
 #region CORS
@@ -199,6 +205,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UsePathBase("/appointments");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

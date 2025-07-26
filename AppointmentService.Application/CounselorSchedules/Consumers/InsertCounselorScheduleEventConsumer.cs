@@ -21,12 +21,13 @@ public class InsertCounselorScheduleEventConsumer: IConsumer<UserInformationRequ
 
         var userInf = new UserInformation
         {
+            Id = evt.CounselorId,
             Email = evt.Email,
             FirstName = evt.FirstName,
             LastName = evt.LastName,
         };
             
-        var command = new InsertCounselorScheduleCommand(evt.CounselorId, userInf);
+        var command = new InsertCounselorScheduleCommand(userInf);
             
         var response = await _mediator.Send(command);
         

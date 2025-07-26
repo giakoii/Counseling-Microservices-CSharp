@@ -201,7 +201,6 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors();
 app.UseDeveloperExceptionPage(); 
-app.UsePathBase("/auth");
 app.UseRouting();
 app.UseAuthentication();
 app.UseStatusCodePages(); 

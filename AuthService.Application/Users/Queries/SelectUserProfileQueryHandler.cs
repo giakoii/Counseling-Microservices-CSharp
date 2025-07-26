@@ -4,11 +4,11 @@ using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Commands;
+namespace AuthService.Application.Users.Queries;
 
 public record SelectUserProfileQuery(Guid UserId) : IQuery<SelectUserProfileResponse>;
 
-internal class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQuery, SelectUserProfileResponse>
+public class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQuery, SelectUserProfileResponse>
 {
     private readonly INoSqlQueryRepository<UserCollection> _userProfileRepository;
 
