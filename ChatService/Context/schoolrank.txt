@@ -1,0 +1,16 @@
+SchoolRank – Thước đo năng lực học sinh THPT chuẩn quốc tế
+Giới thiệu
+SchoolRank là hệ thống xếp hạng năng lực học tập học sinh THPT toàn quốc, do Đại học FPT phát triển từ năm 2020. Dựa trên phương pháp luận ATAR (Australian Tertiary Admission Rank), SchoolRank mang đến góc nhìn toàn diện về năng lực của học sinh so với mặt bằng chung trên toàn quốc.
+Phương pháp tính
+– Thu thập điểm trung bình cả năm lớp 11 và học kỳ 1 lớp 12 của 9 môn: Toán, Ngữ văn, Tiếng Anh, Vật lý, Hóa học, Sinh học, Lịch sử, Địa lý, GDCD.
+– Áp dụng thuật toán phân tích và chuẩn hóa tương quan giữa các môn, sau đó quy đổi thành thang điểm quốc gia.
+– Xếp hạng học sinh vào các nhóm Top10, Top20, Top30, Top40, Top50 (tương ứng 10%, 20%, 30%, 40%, 50% học sinh có kết quả cao nhất).
+Cách tra cứu
+- Truy cập trang https://schoolrank.fpt.edu.vn
+- Nhập điểm trung bình cả năm lớp 11 và học kỳ 1 lớp 12 (Toán và 2 môn tự chọn)
+- Nhấn “Tra cứu” và nhận ngay vị trí xếp hạng dưới dạng phần trăm
+- Học sinh Top10–Top50 được cấp chứng nhận kèm mã hồ sơ qua email
+Vai trò trong tuyển sinh 2025
+– Phương thức PT1: yêu cầu thí sinh đạt Top50 (Top55 đối với sinh viên thế hệ 1) để xét tuyển theo học bạ.
+– Là điều kiện nhận học bổng toàn phần cho Top10 và tham gia chương trình “Học trước – Trả sau” cho Top40.
+– Chính thức mở cổng tra cứu từ ngày 20/1/2025 và đóng vai trò là công cụ khách quan hỗ trợ thí sinh định hướng chọn trường, chọn ngành.
