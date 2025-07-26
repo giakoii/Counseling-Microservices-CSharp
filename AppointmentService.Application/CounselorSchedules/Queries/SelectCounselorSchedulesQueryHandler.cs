@@ -3,7 +3,7 @@ using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
 using MassTransit.Initializers;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Helpers;
 
 namespace AppointmentService.Application.CounselorSchedules.Queries;
@@ -58,7 +58,7 @@ public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselo
             }).ToList();
             
             // Paginate the results
-            var pagedResult = await PaginationHelper.PaginateAsync(counselorScheduleEntities.AsQueryable());
+            var pagedResult = await PaginationHelper.PaginateAsync(counselorScheduleEntities);
             
             // Set the response
             response.Response = pagedResult;

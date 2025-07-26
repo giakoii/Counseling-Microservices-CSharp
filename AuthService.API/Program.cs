@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json.Serialization;
 using AuthService.API;
 using AuthService.API.Utils.Const;
 using AuthService.Application.Users.Commands;
@@ -8,7 +9,6 @@ using AuthService.Domain.ReadModels;
 using AuthService.Domain.WriteModels;
 using AuthService.Infrastructure.Data.Contexts;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
-using Common.SystemClient;
 using DotNetEnv;
 using JasperFx;
 using Marten;
@@ -17,8 +17,9 @@ using Microsoft.EntityFrameworkCore;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Abstractions;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Context;
+using Shared.Infrastructure.Logics;
 using Shared.Infrastructure.Repositories;
 using OpenApiSecurityScheme = NSwag.OpenApiSecurityScheme;
 
@@ -54,11 +55,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
     });
 builder.Services.AddScoped<AppDbContext, AuthServiceContext>();
-builder.Services.AddScoped<IIdentityApiClient, IdentityApiClient>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 
 builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Shared.Application.Repositories;
+namespace Shared.Application.Interfaces;
 
 public interface INoSqlQueryRepository<TEntity> where TEntity : class
 {

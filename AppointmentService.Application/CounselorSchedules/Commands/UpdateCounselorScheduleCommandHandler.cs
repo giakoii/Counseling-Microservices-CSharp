@@ -1,7 +1,7 @@
 using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace AppointmentService.Application.CounselorSchedules.Commands;
 

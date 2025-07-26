@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AppointmentService.Domain.WriteModels;
 using AppointmentService.Infrastructure;
+using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Context;
 
@@ -27,9 +28,19 @@ public partial class AppointmentServiceContext : AppDbContext
     public virtual DbSet<Weekday> Weekdays { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Server=160.250.246.33;Database=AppointmentServiceDB;User Id=prn231;Password=Prn231@123;TrustServerCertificate=True;");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            DotNetEnv.Env.Load(); 
 
+            var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("Missing AppointmentServiceDB environment variable");
+
+            optionsBuilder.UseNpgsql(connectionString);
+        }
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AdmissionDocument>(entity =>
@@ -71,9 +82,7 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.HasKey(e => e.AppointmentId).HasName("appointments_pkey");
 
             entity.ToTable("appointments");
-
-            entity.HasIndex(e => e.CounselorId, "idx_appointments_counselor_id");
-
+            
             entity.HasIndex(e => e.AppointmentDate, "idx_appointments_date");
 
             entity.HasIndex(e => e.StatusId, "idx_appointments_status_id");
@@ -85,16 +94,12 @@ public partial class AppointmentServiceContext : AppDbContext
                 .HasColumnName("appointment_id");
             entity.Property(e => e.AppointmentDate).HasColumnName("appointment_date");
             entity.Property(e => e.Content).HasColumnName("content");
-            entity.Property(e => e.CounselorId).HasColumnName("counselor_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("created_by");
-            entity.Property(e => e.DurationMinutes)
-                .HasDefaultValue((short)30)
-                .HasColumnName("duration_minutes");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");

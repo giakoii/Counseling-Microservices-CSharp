@@ -5,18 +5,17 @@ namespace Shared.Infrastructure.Helpers;
 public static class PaginationHelper
 {
     public static async Task<PagedResult<T>> PaginateAsync<T>(
-        IQueryable<T> query, int pageNumber = 1, 
+        List<T> query, int pageNumber = 1, 
         int pageSize = 10) where T : notnull
     {
         var result = new PagedResult<T>
         {
             PageNumber = pageNumber,
             PageSize = pageSize,
-            TotalRecords = await query.CountAsync(),
-            Items = (await query
+            TotalRecords = query.Count(),
+            Items = (query
                     .Skip((pageNumber) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync())
+                    .Take(pageSize).ToList())
                 .ToList()
         };
 

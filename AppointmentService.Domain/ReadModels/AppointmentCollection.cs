@@ -45,7 +45,7 @@ public class AppointmentCollection
         var result = new AppointmentCollection
         {
             Id = model.AppointmentId,
-            CounselorId = model.CounselorId,
+            CounselorId = model.Schedule!.CounselorId,
             AppointmentDate = model.AppointmentDate,
             Status = model.StatusId ?? 1,
             CreatedAt = model.CreatedAt,

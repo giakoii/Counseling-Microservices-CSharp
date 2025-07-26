@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Shared.Application.Repositories;
+namespace Shared.Application.Interfaces;
 
 public interface ICommandRepository<TEntity> where TEntity : class
 {

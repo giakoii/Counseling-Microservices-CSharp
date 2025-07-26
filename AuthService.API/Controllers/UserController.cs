@@ -3,7 +3,6 @@ using AuthService.API.Helpers;
 using AuthService.Application.Users.Commands;
 using AuthService.Application.Users.Queries;
 using Common;
-using Common.SystemClient;
 using Common.Utils.Const;
 using MediatR;
 using Microsoft.AspNetCore;
@@ -14,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
+using Shared.Application.Interfaces;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AuthService.API.Controllers;
@@ -25,9 +25,9 @@ public class UserController : ControllerBase
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IOpenIddictTokenManager _tokenManager;
     private readonly IMediator _mediator;
-    private readonly IIdentityApiClient _identityApiClient;
+    private readonly IIdentityService _identityApiClient;
 
-    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager, IOpenIddictTokenManager tokenManager, IIdentityApiClient identityApiClient)
+    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager, IOpenIddictTokenManager tokenManager, IIdentityService identityApiClient)
     {
         _mediator = mediator;
         _scopeManager = scopeManager;
