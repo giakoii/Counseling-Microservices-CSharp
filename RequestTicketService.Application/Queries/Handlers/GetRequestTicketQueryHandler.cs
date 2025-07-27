@@ -23,7 +23,6 @@ namespace RequestTicketService.Application.Queries.Handlers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        // Handle single-ticket query
         public async Task<RequestTicketDto> Handle(
             GetRequestTicketIdQuery request,
             CancellationToken cancellationToken
@@ -40,7 +39,6 @@ namespace RequestTicketService.Application.Queries.Handlers
             return MapToDto(entity);
         }
 
-        // Handle multi-ticket query
         public async Task<IEnumerable<RequestTicketDto>> Handle(
             GetRequestTicketsQuery request,
             CancellationToken cancellationToken
@@ -68,13 +66,11 @@ namespace RequestTicketService.Application.Queries.Handlers
             return entities.Select(MapToDto);
         }
 
-        // Base query for RequestTicket including chats
         private IQueryable<RequestTicket> BaseEntityQuery()
         {
             return _repository.GetView<RequestTicket>().Include(t => t.RequestTicketChats);
         }
 
-        // Map entity to DTO
         private RequestTicketDto MapToDto(RequestTicket t)
         {
             return new RequestTicketDto
