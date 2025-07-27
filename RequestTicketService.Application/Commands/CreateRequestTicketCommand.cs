@@ -10,7 +10,6 @@ namespace RequestTicketService.Application.Commands
     public class CreateRequestTicketCommand : ICommand<Guid>
     {
         public Guid StudentId { get; set; }
-        public Guid? CounselorId { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
         public short? PriorityId { get; set; }

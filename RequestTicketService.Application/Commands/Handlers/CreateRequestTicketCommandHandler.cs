@@ -27,7 +27,6 @@ namespace RequestTicketService.Application.Commands.Handlers
                 TicketId = Guid.NewGuid(),
                 StudentId = command.StudentId,
                 Title = command.Title,
-                CounselorId = command.CounselorId,
                 Description = command.Description,
                 PriorityId = command.PriorityId,
                 Category = command.Category,
