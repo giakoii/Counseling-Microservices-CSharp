@@ -3,7 +3,6 @@ using AuthService.API.Helpers;
 using AuthService.Application.Users.Commands;
 using AuthService.Application.Users.Queries;
 using Common;
-using Common.SystemClient;
 using Common.Utils.Const;
 using MediatR;
 using Microsoft.AspNetCore;
@@ -14,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
+using Shared.Application.Interfaces;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AuthService.API.Controllers;
@@ -25,9 +25,9 @@ public class UserController : ControllerBase
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IOpenIddictTokenManager _tokenManager;
     private readonly IMediator _mediator;
-    private readonly IIdentityApiClient _identityApiClient;
+    private readonly IIdentityService _identityApiClient;
 
-    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager, IOpenIddictTokenManager tokenManager, IIdentityApiClient identityApiClient)
+    public UserController(IMediator mediator, IOpenIddictScopeManager scopeManager, IOpenIddictTokenManager tokenManager, IIdentityService identityApiClient)
     {
         _mediator = mediator;
         _scopeManager = scopeManager;
@@ -44,7 +44,16 @@ public class UserController : ControllerBase
     [Route("[action]")]
     public async Task<IActionResult> InsertUser([FromBody] InsertUserCommand request)
     {
-        var response = new BaseResponse { Success = false };
+        var response = new BaseCommandResponse { Success = false };
+        
+        // Error check request
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        
         try
         {
             response = await _mediator.Send(request);
@@ -67,7 +76,15 @@ public class UserController : ControllerBase
     [Authorize(Roles = ConstRole.Admin, AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     public async Task<IActionResult> InsertCounselor([FromBody] InsertCounselorCommand request)
     {
-        var response = new BaseResponse { Success = false };
+        var response = new BaseCommandResponse { Success = false };
+        
+        // Error check request
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
         try
         {
             response = await _mediator.Send(request);
@@ -135,6 +152,33 @@ public class UserController : ControllerBase
             return Unauthorized(result);
         }
         return Ok(result);
+    }
+    
+    [HttpPatch("[action]")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand request)
+    {
+        var response = new BaseCommandResponse { Success = false };
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        try
+        {
+            response = await _mediator.Send(request);
+            if (response.MessageId == MessageId.E11001)
+            {
+                return Unauthorized(response);
+            }
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            response.SetMessage(MessageId.E99999);
+            return BadRequest(response);
+        }
     }
 
     /// <summary>

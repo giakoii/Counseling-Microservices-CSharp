@@ -8,7 +8,7 @@ namespace AppointmentService.API.Controllers;
 /// CounselorScheduleController - Controller for managing counselor schedules.
 /// </summary>
 [ApiController]
-[Route("api/counselor-schedule")]
+[Route("api/v1/counselor-schedule")]
 public class CounselorScheduleController : ControllerBase
 {
     private readonly IMediator _mediator;

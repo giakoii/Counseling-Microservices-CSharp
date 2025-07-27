@@ -4,7 +4,6 @@ using Common.Utils.Const;
 namespace Common;
 
 public abstract class AbstractResponse<T>
-    where T : class
 {
     /// <summary>
     /// Success

@@ -1,0 +1,26 @@
+Đối tượng tuyển sinh
+Thí sinh tốt nghiệp THPT trong nước hoặc có bằng tốt nghiệp THPT nước ngoài tương đương và đăng ký theo học tại Đại học FPT. [^2]
+Phương thức tuyển sinh
+PT1 – Xét kết quả học tập cấp THPT (học bạ)
+Xét theo thứ hạng Top50 trên hệ thống SchoolRank (Top55 đối với sinh viên thế hệ 1) dựa trên điểm học bạ lớp 11 và học kỳ 1 lớp 12. Điều kiện xét: tổng điểm tổ hợp Toán và hai môn bất kỳ trong học kỳ 2 lớp 12 đạt từ 21 điểm trở lên (19,5 điểm với sinh viên thế hệ 1). [^2]
+PT2 – Sử dụng kết quả thi đánh giá năng lực
+Dựa trên kết quả kỳ thi đánh giá năng lực của ĐHQG Hà Nội hoặc ĐHQG TP.HCM năm 2025. Ngưỡng xét: tương đương Top50 của PT1 (78 điểm với ĐHQG Hà Nội, 653 điểm với ĐHQG TP.HCM). [^2]
+PT3 – Xét kết quả thi tốt nghiệp THPT
+Dùng kết quả thi tốt nghiệp THPT năm 2025 hoặc các năm trước. Với kỳ thi năm 2025, điểm chuẩn xét tuyển là 18,5 điểm (17 điểm với sinh viên thế hệ 1). Với kỳ thi các năm trước, điểm chuẩn xét tuyển là 21 điểm (19,5 điểm với sinh viên thế hệ 1). [^2]
+PT4 – Phương thức khác
+Áp dụng cho thí sinh tốt nghiệp THPT nước ngoài hoặc sử dụng một trong các chứng chỉ, văn bằng quốc tế:
+- APTECH HDSE/ADSE, ARENA ADIM, SKILLKING, JETKING
+- Chương trình BTEC HND (Melbourne Polytechnic)
+- FUNiX Software Engineering
+- Cao đẳng FPT Polytechnic
+- THPT thành viên của Tổ chức Giáo dục FPT
+Ngưỡng xét tương đương PT1. [^2]
+Yêu cầu về ngoại ngữ
+Thí sinh cần có một trong các chứng chỉ sau để được quy đổi thành 10 điểm ngoại ngữ khi xét tuyển:
+- VSTEP cấp độ 4
+- TOEFL PBT ≥ 575; TOEFL ITP ≥ 542; TOEFL iBT ≥ 60
+- IELTS Academic ≥ 6.0
+- TOEIC (L&R & S&W) ≥ 785 & 310
+- PTE Academic; Cambridge English (FCE/CAE/CPE)
+- JLPT từ N3; TOPIK cấp độ 4; HSK cấp độ 4
+Với thí sinh chưa đạt trình độ ngoại ngữ yêu cầu, có thể đăng ký học chương trình dự bị tiếng Anh do Đại học FPT tổ chức cho đến khi đủ điều kiện vào chuyên ngành. [^2]

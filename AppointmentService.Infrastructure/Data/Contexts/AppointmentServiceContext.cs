@@ -19,11 +19,7 @@ public partial class AppointmentServiceContext : AppDbContext
 
     public virtual DbSet<Appointment> Appointments { get; set; }
 
-    public virtual DbSet<CounselorSchedule> CounselorSchedules { get; set; }
-
-    public virtual DbSet<CounselorScheduleDay> CounselorScheduleDays { get; set; }
-
-    public virtual DbSet<CounselorScheduleSlot> CounselorScheduleSlots { get; set; }
+    public virtual DbSet<CounselorScheduleDetail> CounselorScheduleDetails { get; set; }
 
     public virtual DbSet<Payment> Payments { get; set; }
 
@@ -40,7 +36,7 @@ public partial class AppointmentServiceContext : AppDbContext
             var connectionString = Environment.GetEnvironmentVariable(ConstEnv.AppointmentServiceDB);
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("Missing AppointmentServiceDB environment variable");
+                throw new InvalidOperationException("Missing CONNECTION_STRING environment variable");
 
             optionsBuilder.UseNpgsql(connectionString);
         }
@@ -86,9 +82,7 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.HasKey(e => e.AppointmentId).HasName("appointments_pkey");
 
             entity.ToTable("appointments");
-
-            entity.HasIndex(e => e.CounselorId, "idx_appointments_counselor_id");
-
+            
             entity.HasIndex(e => e.AppointmentDate, "idx_appointments_date");
 
             entity.HasIndex(e => e.StatusId, "idx_appointments_status_id");
@@ -100,16 +94,12 @@ public partial class AppointmentServiceContext : AppDbContext
                 .HasColumnName("appointment_id");
             entity.Property(e => e.AppointmentDate).HasColumnName("appointment_date");
             entity.Property(e => e.Content).HasColumnName("content");
-            entity.Property(e => e.CounselorId).HasColumnName("counselor_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("created_by");
-            entity.Property(e => e.DurationMinutes)
-                .HasDefaultValue((short)30)
-                .HasColumnName("duration_minutes");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
@@ -124,46 +114,23 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("updated_by");
+
+            entity.HasOne(d => d.Schedule).WithMany(p => p.Appointments)
+                .HasForeignKey(d => d.ScheduleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_schedule");
         });
 
-        modelBuilder.Entity<CounselorSchedule>(entity =>
+        modelBuilder.Entity<CounselorScheduleDetail>(entity =>
         {
-            entity.HasKey(e => e.CounselorEmail).HasName("counselor_schedules_pkey");
+            entity.HasKey(e => e.Id).HasName("counselor_schedule_details_pkey");
 
-            entity.ToTable("counselor_schedules");
-
-            entity.Property(e => e.CounselorEmail)
-                .HasMaxLength(100)
-                .HasColumnName("counselor_email");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("created_at");
-            entity.Property(e => e.CreatedBy)
-                .HasMaxLength(256)
-                .HasColumnName("created_by");
-            entity.Property(e => e.IsActive)
-                .HasDefaultValue(true)
-                .HasColumnName("is_active");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(256)
-                .HasColumnName("updated_by");
-        });
-
-        modelBuilder.Entity<CounselorScheduleDay>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("counselor_schedule_days_pkey");
-
-            entity.ToTable("counselor_schedule_days");
+            entity.ToTable("counselor_schedule_details");
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
-            entity.Property(e => e.CounselorEmail)
-                .HasMaxLength(100)
-                .HasColumnName("counselor_email");
+            entity.Property(e => e.CounselorId).HasColumnName("counselor_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnName("created_at");
@@ -173,44 +140,6 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(256)
-                .HasColumnName("updated_by");
-            entity.Property(e => e.WeekdayId).HasColumnName("weekday_id");
-
-            entity.HasOne(d => d.CounselorEmailNavigation).WithMany(p => p.CounselorScheduleDays)
-                .HasForeignKey(d => d.CounselorEmail)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("counselor_schedule_days_schedule_email_fkey");
-
-            entity.HasOne(d => d.Weekday).WithMany(p => p.CounselorScheduleDays)
-                .HasForeignKey(d => d.WeekdayId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("counselor_schedule_days_weekday_id_fkey");
-        });
-
-        modelBuilder.Entity<CounselorScheduleSlot>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("counselor_schedule_slots_pkey");
-
-            entity.ToTable("counselor_schedule_slots");
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("created_at");
-            entity.Property(e => e.CreatedBy)
-                .HasMaxLength(256)
-                .HasColumnName("created_by");
-            entity.Property(e => e.IsActive)
-                .HasDefaultValue(true)
-                .HasColumnName("is_active");
-            entity.Property(e => e.ScheduleDayId).HasColumnName("schedule_day_id");
             entity.Property(e => e.SlotId).HasColumnName("slot_id");
             entity.Property(e => e.Status)
                 .HasDefaultValue((short)1)
@@ -221,16 +150,17 @@ public partial class AppointmentServiceContext : AppDbContext
             entity.Property(e => e.UpdatedBy)
                 .HasMaxLength(256)
                 .HasColumnName("updated_by");
+            entity.Property(e => e.WeekdayId).HasColumnName("weekday_id");
 
-            entity.HasOne(d => d.ScheduleDay).WithMany(p => p.CounselorScheduleSlots)
-                .HasForeignKey(d => d.ScheduleDayId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("counselor_schedule_slots_schedule_day_id_fkey");
-
-            entity.HasOne(d => d.Slot).WithMany(p => p.CounselorScheduleSlots)
+            entity.HasOne(d => d.Slot).WithMany(p => p.CounselorScheduleDetails)
                 .HasForeignKey(d => d.SlotId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("counselor_schedule_slots_slot_id_fkey");
+                .HasConstraintName("fk_slot");
+
+            entity.HasOne(d => d.Weekday).WithMany(p => p.CounselorScheduleDetails)
+                .HasForeignKey(d => d.WeekdayId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_weekday");
         });
 
         modelBuilder.Entity<Payment>(entity =>
