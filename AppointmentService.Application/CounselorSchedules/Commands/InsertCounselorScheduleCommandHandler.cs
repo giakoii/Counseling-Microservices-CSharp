@@ -91,13 +91,7 @@ internal class InsertCounselorScheduleCommandHandler
 
                 foreach (var scheduleDetail in counselorSchedules)
                 {
-                    _counselorScheduleRepository.Store(
-                        CounselorScheduleDetailCollection.FromWriteModel(
-                            scheduleDetail,
-                            request.Counselor
-                        ),
-                        "Admin"
-                    );
+                    _counselorScheduleRepository.Store(CounselorScheduleDetailCollection.FromWriteModel(scheduleDetail, request.Counselor), "Admin");
                 }
                 await _counselorScheduleRepository.SessionSavechanges();
 

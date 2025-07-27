@@ -2,9 +2,7 @@ using AppointmentService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
-using MassTransit.Initializers;
 using Shared.Application.Interfaces;
-using Shared.Infrastructure.Helpers;
 
 namespace AppointmentService.Application.CounselorSchedules.Queries;
 
@@ -20,8 +18,7 @@ public class
     /// Constructor
     /// </summary>
     /// <param name="counselorScheduleRepository"></param>
-    public SelectCounselorSchedulesQueryHandler(
-        INoSqlQueryRepository<CounselorScheduleDetailCollection> counselorScheduleRepository)
+    public SelectCounselorSchedulesQueryHandler(INoSqlQueryRepository<CounselorScheduleDetailCollection> counselorScheduleRepository)
     {
         _counselorScheduleRepository = counselorScheduleRepository;
     }
@@ -37,30 +34,32 @@ public class
         var response = new SelectCounselorSchedulesResponse { Success = false };
         try
         {
-            // Get current day of the week (1 = Monday, 7 = Sunday)
-            var currentDayOfWeek = (int) DateTime.Now.DayOfWeek;
+            var now = DateTime.Now;
+            var currentDayOfWeek = (int)now.DayOfWeek;
             var currentWeekdayId = currentDayOfWeek == 0 ? 7 : currentDayOfWeek;
-
-            // Get current time
-            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
-
-            // Map currentTime to currentSlotId (implement this mapping as needed)
-            int currentSlotId = GetCurrentSlotId(currentTime);
-
-            // Retrieve all counselor schedules
+            var currentTime = TimeOnly.FromDateTime(now);
+    
             var counselorSchedules = await _counselorScheduleRepository.FindAllAsync(x => x.IsActive);
-
-            // Filter schedules: 
-            // - DayId > currentWeekdayId
-            // - OR (DayId == currentWeekdayId AND SlotId > currentSlotId)
-            var filteredSchedules = counselorSchedules
-                .Where(x =>
-                    x.WeekdayId > currentWeekdayId ||
-                    (x.WeekdayId == currentWeekdayId && x.StartTime > currentTime)
-                )
-                .ToList();
-
-            // Convert to a list of SelectCounselorSchedulesEntity
+    
+            List<CounselorScheduleDetailCollection> filteredSchedules;
+    
+            // If today is Sunday and after 5 PM, show all slots for next week (Monday to Sunday)
+            if (currentDayOfWeek == 0 && currentTime > new TimeOnly(17, 0))
+            {
+                filteredSchedules = counselorSchedules
+                    .Where(x => x.WeekdayId >= 1 && x.WeekdayId <= 7)
+                    .ToList();
+            }
+            else
+            {
+                filteredSchedules = counselorSchedules
+                    .Where(x =>
+                        x.WeekdayId > currentWeekdayId ||
+                        (x.WeekdayId == currentWeekdayId && x.StartTime > currentTime)
+                    )
+                    .ToList();
+            }
+    
             var counselorScheduleEntities = filteredSchedules.Select(x => new SelectCounselorSchedulesEntity
             {
                 ScheduleId = x.Id,
@@ -72,7 +71,7 @@ public class
                 Day = x.DayName,
                 Slot = $"{x.StartTime} - {x.EndTime}",
             }).ToList();
-
+    
             response.Response = counselorScheduleEntities;
             response.SetMessage(MessageId.I00001);
             response.Success = true;
@@ -82,7 +81,7 @@ public class
             response.Success = false;
             response.SetMessage(MessageId.E00000, $"Error retrieving counselor schedules: {ex.Message}");
         }
-
+    
         return response;
     }
 
@@ -127,7 +126,7 @@ public class SelectCounselorSchedulesEntity
 {
     public Guid ScheduleId { get; set; }
 
-    public string CounselorEmail { get; set; }
+    public string CounselorEmail { get; set; } = null!;
 
     public string CounselorName { get; set; } = null!;
 

@@ -36,8 +36,8 @@ public class AppointmentController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> InsertAppointment([FromBody] AppointmentInsertCommand request)
     {
-        var response = new BaseCommandResponse { Success = false };
-        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        var response = new AppointmentInsertResponse { Success = false };
+        var errorList = AbstractFunction<AppointmentInsertResponse, AppointmentInsertEntity>.ErrorCheck(ModelState);
         if (errorList.Count > 0)
         {
             response.SetMessage(MessageId.E10000);
@@ -46,7 +46,7 @@ public class AppointmentController : ControllerBase
         response = await _mediator.Send(request);
         if (response.Success)
         {
-            return Created(response.Response, response);
+            return Created(response.AppointmentId, response);
         }
         
         return BadRequest(response);
@@ -81,6 +81,27 @@ public class AppointmentController : ControllerBase
         request.AppointmentId = id;
 
         var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        response = await _mediator.Send(request);
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+        
+        return BadRequest(response);
+    }
+    
+    [HttpPatch("{appointmentId}/payment-call-back")]
+    public async Task<IActionResult> AppointmentPaymentCallbackAsync([FromRoute] Guid appointmentId, [FromBody] AppointmentPaymentCallbackCommand request)
+    {
+        var response = new AppointmentInsertResponse { Success = false };
+        request.AppointmentId = appointmentId;
+
+        var errorList = AbstractFunction<AppointmentInsertResponse, AppointmentInsertEntity>.ErrorCheck(ModelState);
         if (errorList.Count > 0)
         {
             response.SetMessage(MessageId.E10000);

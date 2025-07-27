@@ -24,4 +24,24 @@ public static class ConstantEnum
         Cancelled = 4,
     }
 
+    public enum PaymentId
+    {
+        Success = 00,
+    }
+    
+    public enum PaymentStatus
+    {
+        Pending = 1,
+        Success = 2,
+        Failed = 3,
+    }
+    
+    public enum PaymentMethod
+    {
+        PayOs = 1,
+        MoMo = 2,
+        ZaloPay = 3,
+        BankTransfer = 4,
+    }
+    
 }
