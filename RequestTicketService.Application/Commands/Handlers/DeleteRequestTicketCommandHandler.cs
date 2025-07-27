@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BuildingBlocks.CQRS;
 using RequestTicketService.Domain.Models;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace RequestTicketService.Application.Commands.Handlers
 {

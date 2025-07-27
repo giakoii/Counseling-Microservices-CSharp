@@ -14,7 +14,7 @@ using RequestTicketService.Application.Dtos;
 using RequestTicketService.Application.Queries;
 using RequestTicketService.Application.Queries.Handlers;
 using RequestTicketService.Infrastructure.Data.Contexts;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
