@@ -155,6 +155,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UsePathBase("/request-tickets");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

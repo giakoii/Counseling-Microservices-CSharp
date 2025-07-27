@@ -12,13 +12,15 @@ using DotNetEnv;
 using JasperFx;
 using Marten;
 using MassTransit;
+using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Validation.AspNetCore;
-using Shared.Application.Repositories;
 using Shared.Infrastructure.Context;
 using Shared.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Interfaces;
+using Shared.Infrastructure.Logics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,9 +59,7 @@ builder.Services.AddMarten(options =>
     // Register all aggregate roots or document types
     options.Schema.For<WeekdayCollection>().Identity(x => x.Id);
     options.Schema.For<TimeSlotCollection>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleCollection>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleDayCollection>().Identity(x => x.Id);
-    options.Schema.For<CounselorScheduleSlotCollection>().Identity(x => x.Id);
+    options.Schema.For<CounselorScheduleDetailCollection>().Identity(x => x.Id);
     options.Schema.For<PaymentCollection>().Identity(x => x.Id);
     options.Schema.For<AppointmentCollection>().Identity(x => x.Id);
     options.Schema.For<AdmissionDocumentCollection>().Identity(x => x.DocumentId);
@@ -90,12 +90,16 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 
-    x.AddRequestClient<InsertCounselorScheduleRequest>();
+    x.AddRequestClient<UserInformationRequest>();
 });
 
 #endregion
 
-#region Repository Registrations
+#region Registrations
+builder.Services.AddHttpContextAccessor();
+
+// Register application services
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 // Generic repository registrations
 builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
@@ -103,7 +107,7 @@ builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepositor
 builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlRepository<>));
 
 // Specific domain entity repositories (optional if needed separately)
-builder.Services.AddScoped<ICommandRepository<CounselorSchedule>, CommandRepository<CounselorSchedule>>();
+builder.Services.AddScoped<ICommandRepository<CounselorScheduleDetail>, CommandRepository<CounselorScheduleDetail>>();
 builder.Services.AddScoped<ICommandRepository<Weekday>, CommandRepository<Weekday>>();
 builder.Services.AddScoped<ICommandRepository<TimeSlot>, CommandRepository<TimeSlot>>();
 
@@ -121,7 +125,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddOpenIddict()
     .AddValidation(options =>
     {
-        options.SetIssuer($"https://localhost:5001/");
+        options.SetIssuer($"http://localhost:5050/");
         options.AddAudiences("service_client");
 
         options.UseIntrospection()
@@ -161,6 +165,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 #endregion
 
 #region CORS
@@ -196,6 +205,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UsePathBase("/appointments");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

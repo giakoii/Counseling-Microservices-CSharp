@@ -6,5 +6,5 @@ public partial class Weekday
 
     public string DayName { get; set; } = null!;
 
-    public virtual ICollection<CounselorScheduleDay> CounselorScheduleDays { get; set; } = new List<CounselorScheduleDay>();
+    public virtual ICollection<CounselorScheduleDetail> CounselorScheduleDetails { get; set; } = new List<CounselorScheduleDetail>();
 }

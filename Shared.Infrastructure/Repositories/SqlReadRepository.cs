@@ -1,10 +1,11 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Context;
 
 namespace Shared.Infrastructure.Repositories;
 
-public class SqlReadRepository<TEntity>(AppDbContext context) : Application.Repositories.ISqlReadRepository<TEntity> where TEntity : class
+public class SqlReadRepository<TEntity>(AppDbContext context) : ISqlReadRepository<TEntity> where TEntity : class
 {
     protected readonly AppDbContext Context = context;
 

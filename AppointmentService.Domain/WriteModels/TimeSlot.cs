@@ -8,5 +8,5 @@ public partial class TimeSlot
 
     public TimeOnly EndTime { get; set; }
 
-    public virtual ICollection<CounselorScheduleSlot> CounselorScheduleSlots { get; set; } = new List<CounselorScheduleSlot>();
+    public virtual ICollection<CounselorScheduleDetail> CounselorScheduleDetails { get; set; } = new List<CounselorScheduleDetail>();
 }

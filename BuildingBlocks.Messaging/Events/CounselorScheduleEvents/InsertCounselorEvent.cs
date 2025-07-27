@@ -1,8 +1,10 @@
 namespace BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 
-public record InsertCounselorScheduleRequest : IntegrationEvent
+public record UserInformationRequest : IntegrationEvent
 {
-    public required string CounselorEmail { get; set; }
+    public required Guid CounselorId { get; set; }
+    public required string Email { get; set; }
+    public required string FirstName { get; set; }
     
-    public required string CounselorName { get; set; }
+    public required string LastName { get; set; } = null!;
 }
