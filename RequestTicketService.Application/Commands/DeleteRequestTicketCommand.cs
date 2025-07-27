@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BuildingBlocks.CQRS;
-using RequestTicketService.Application.Dtos;
 
-namespace RequestTicketService.Application.Queries
+namespace RequestTicketService.Application.Commands
 {
-    public class GetRequestTicketQuery : IQuery<RequestTicketDto>
+    public class DeleteRequestTicketCommand : ICommand<bool>
     {
         public Guid TicketId { get; set; }
+        public string UpdatedBy { get; set; } = null!;
     }
 }

@@ -14,8 +14,7 @@ using RequestTicketService.Application.Dtos;
 using RequestTicketService.Application.Queries;
 using RequestTicketService.Application.Queries.Handlers;
 using RequestTicketService.Infrastructure.Data.Contexts;
-using Shared.Application.Repositories;
-using Shared.Infrastructure.Context;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,47 +55,33 @@ builder.Services.AddOpenApiDocument(config =>
         }
     );
 });
-builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
-builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
+
 builder.Services.AddScoped<
-    ICommandHandler<AddRequestTicketChatCommand, Guid>,
-    AddRequestTicketChatCommandHandler
->();
-builder.Services.AddScoped<
-    IQueryHandler<GetRequestTicketQuery, RequestTicketDto>,
-    GetRequestTicketQueryHandler
+    IQueryHandler<GetRequestTicketIdQuery, RequestTicketDto>,
+    RequestTicketQueryHandler
 >();
 builder.Services.AddScoped<
     IQueryHandler<GetRequestTicketsQuery, IEnumerable<RequestTicketDto>>,
-    GetRequestTicketsQueryHandler
+    RequestTicketQueryHandler
 >();
 builder.Services.AddScoped<
     ICommandHandler<CreateRequestTicketCommand, Guid>,
     CreateRequestTicketCommandHandler
 >();
 builder.Services.AddScoped<
-    ICommandHandler<CreateRequestTicketChatCommand, Guid>,
-    CreateRequestTicketChatCommandHandler
+    ICommandHandler<UpdateRequestTicketCommand, bool>,
+    UpdateRequestTicketCommandHandler
 >();
 builder.Services.AddScoped<
-    ICommandHandler<UpdateRequestTicketChatCommand, bool>,
-    UpdateRequestTicketChatCommandHandler
+    ICommandHandler<DeleteRequestTicketCommand, bool>,
+    DeleteRequestTicketCommandHandler
 >();
-builder.Services.AddScoped<
-    ICommandHandler<DeleteRequestTicketChatCommand, bool>,
-    DeleteRequestTicketChatCommandHandler
->();
-builder.Services.AddScoped<
-    IQueryHandler<GetRequestTicketChatQuery, RequestTicketChatDto>,
-    GetRequestTicketChatQueryHandler
->();
-builder.Services.AddScoped<
-    IQueryHandler<GetRequestTicketChatsQuery, IEnumerable<RequestTicketChatDto>>,
-    GetRequestTicketChatsQueryHandler
->();
-builder.Services.AddScoped<AppDbContext>(sp =>
+builder.Services.AddScoped<Shared.Infrastructure.Context.AppDbContext>(sp =>
     sp.GetRequiredService<RequestTicketServiceContext>()
 );
+
+builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
+builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
 
 // Allow API to be read from outside
 builder.Services.AddCors(options =>

@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Common;
 
-public class AbstractFunction<U, V> where U : AbstractResponse<V>
+public class AbstractFunction<U, V>
+    where U : AbstractResponse<V>
 {
-
     /// <summary>
     /// Error check
     /// </summary>
@@ -26,7 +26,10 @@ public class AbstractFunction<U, V> where U : AbstractResponse<V>
             var key = entry.Key;
             var modelStateEntity = entry.Value;
 
-            if (modelStateEntity == null || modelStateEntity.ValidationState == ModelValidationState.Valid)
+            if (
+                modelStateEntity == null
+                || modelStateEntity.ValidationState == ModelValidationState.Valid
+            )
                 continue;
 
             // Remove the prefix "Value." from the key
@@ -34,7 +37,10 @@ public class AbstractFunction<U, V> where U : AbstractResponse<V>
             keyReplace = Regex.Replace(keyReplace, @"^Value\[\d+\]\.", "");
 
             // Get error message
-            var errorMessage = string.Join("; ", modelStateEntity.Errors.Select(e => e.ErrorMessage));
+            var errorMessage = string.Join(
+                "; ",
+                modelStateEntity.Errors.Select(e => e.ErrorMessage)
+            );
 
             var detailError = new DetailError();
             Match matchesKey;
