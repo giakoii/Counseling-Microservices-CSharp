@@ -14,7 +14,7 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/appointment")]
-[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+//[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class AppointmentController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -87,6 +87,32 @@ public class AppointmentController : ControllerBase
         var query = new AppointmentSelectByIdQuery
         {
             AppointmentId = id
+        };
+        
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
+    
+    /// <summary>
+    /// Select appointments by user ID with pagination.
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10)</param>
+    /// <returns></returns>
+    [HttpGet("user/{userId}")]
+    public async Task<IActionResult> SelectAppointmentByUserIdAsync([FromRoute] Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var query = new AppointmentSelectByUserIdQuery
+        {
+            UserId = userId,
+            PageNumber = pageNumber,
+            PageSize = pageSize
         };
         
         var result = await _mediator.Send(query);

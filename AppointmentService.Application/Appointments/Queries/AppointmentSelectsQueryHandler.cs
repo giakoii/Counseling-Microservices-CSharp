@@ -19,6 +19,13 @@ public class AppointmentSelectByIdQuery : IQuery<AppointmentSelectByIdQueryRespo
     public Guid AppointmentId { get; set; }
 }
 
+public class AppointmentSelectByUserIdQuery : IQuery<AppointmentSelectByUserIdQueryResponse>
+{
+    public Guid UserId { get; set; }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
+
 /// <summary>
 /// AppointmentSelectsQueryHandler - Handles the retrieval of appointment selections by user or counselor.
 /// </summary>
@@ -142,6 +149,67 @@ public class AppointmentSelectByIdQueryHandler : IQueryHandler<AppointmentSelect
     }
 }
 
+/// <summary>
+/// AppointmentSelectByUserIdQueryHandler - Handles the retrieval of appointments by specific user ID.
+/// </summary>
+public class AppointmentSelectByUserIdQueryHandler : IQueryHandler<AppointmentSelectByUserIdQuery, AppointmentSelectByUserIdQueryResponse>
+{
+    private readonly INoSqlQueryRepository<AppointmentCollection> _appointmentRepository;
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="appointmentRepository"></param>
+    public AppointmentSelectByUserIdQueryHandler(INoSqlQueryRepository<AppointmentCollection> appointmentRepository)
+    {
+        _appointmentRepository = appointmentRepository;
+    }
+    
+    public async Task<AppointmentSelectByUserIdQueryResponse> Handle(AppointmentSelectByUserIdQuery request, CancellationToken cancellationToken)
+    {
+        var response = new AppointmentSelectByUserIdQueryResponse { Success = false };
+        
+        try
+        {
+            // Find appointments by specific user ID
+            var appointments = await _appointmentRepository.FindAllAsync(x => x.UserId == request.UserId && x.IsActive);
+            
+            if (!appointments.Any())
+            {
+                response.SetMessage(MessageId.I00000, "No appointments found for the specified user.");
+                return response;
+            }
+            
+            // Map appointments to response entities
+            var appointmentEntities = appointments.Select(appointment => new AppointmentSelectsQueryEntity
+            {
+                Id = appointment.Id,
+                CounselorId = appointment.CounselorId,
+                AppointmentDate = appointment.AppointmentDate,
+                Status = appointment.Status,
+                CreatedAt = appointment.CreatedAt,
+                UpdatedAt = appointment.UpdatedAt,
+                Counselor = appointment.Counselor,
+                User = appointment.User,
+            }).OrderByDescending(x => x.AppointmentDate).ToList();
+            
+            // Apply pagination
+            var paginatedResult = await PaginationHelper.PaginateAsync(appointmentEntities, request.PageNumber, request.PageSize);
+            
+            response.Response = paginatedResult;
+            response.Success = true;
+            response.SetMessage(MessageId.I00001);
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.SetMessage(MessageId.E00000, $"Error retrieving appointments for user: {ex.Message}");
+        }
+        
+        return response;
+    }
+}
+
 public class AppointmentSelectsQueryResponse : AbstractResponse<PagedResult<AppointmentSelectsQueryEntity>>
 {
     public override PagedResult<AppointmentSelectsQueryEntity> Response { get; set; } = new();
@@ -150,6 +218,11 @@ public class AppointmentSelectsQueryResponse : AbstractResponse<PagedResult<Appo
 public class AppointmentSelectByIdQueryResponse : AbstractResponse<AppointmentSelectsQueryEntity>
 {
     public override AppointmentSelectsQueryEntity Response { get; set; } = null!;
+}
+
+public class AppointmentSelectByUserIdQueryResponse : AbstractResponse<PagedResult<AppointmentSelectsQueryEntity>>
+{
+    public override PagedResult<AppointmentSelectsQueryEntity> Response { get; set; } = new();
 }
 
 public class AppointmentSelectsQueryEntity

@@ -68,4 +68,30 @@ public class CounselorScheduleController : ControllerBase
         
         return BadRequest(result);
     }
+    
+    /// <summary>
+    /// Select counselor schedules by counselor ID with pagination.
+    /// </summary>
+    /// <param name="counselorId">Counselor ID</param>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10)</param>
+    /// <returns></returns>
+    [HttpGet("counselor/{counselorId}")]
+    public async Task<IActionResult> SelectCounselorSchedulesByCounselorIdAsync([FromRoute] Guid counselorId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var query = new SelectCounselorSchedulesByCounselorIdQuery
+        {
+            CounselorId = counselorId,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+        
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
 }
