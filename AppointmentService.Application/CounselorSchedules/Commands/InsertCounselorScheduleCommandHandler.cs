@@ -9,16 +9,18 @@ using Shared.Application.Repositories;
 
 namespace AppointmentService.Application.CounselorSchedules.Commands;
 
-public record InsertCounselorScheduleCommand(string CounselorEmail, string CounselorName) : ICommand<BaseResponse>;
+public record InsertCounselorScheduleCommand(string CounselorEmail, string CounselorName)
+    : ICommand<BaseResponse>;
 
-internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCounselorScheduleCommand, BaseResponse>
+internal class InsertCounselorScheduleCommandHandler
+    : ICommandHandler<InsertCounselorScheduleCommand, BaseResponse>
 {
     private readonly ICommandRepository<CounselorSchedule> _counselorScheduleRepository;
     private readonly ICommandRepository<Weekday> _weekdayRepository;
     private readonly ICommandRepository<TimeSlot> _timeSlotRepository;
     private readonly ICommandRepository<CounselorScheduleDay> _counselorScheduleDayRepository;
     private readonly ICommandRepository<CounselorScheduleSlot> _counselorScheduleSlotRepository;
-    
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -27,7 +29,13 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
     /// <param name="timeSlotRepository"></param>
     /// <param name="counselorScheduleDayRepository"></param>
     /// <param name="counselorScheduleSlotRepository"></param>
-    public InsertCounselorScheduleCommandHandler( ICommandRepository<CounselorSchedule> counselorScheduleRepository, ICommandRepository<Weekday> weekdayRepository, ICommandRepository<TimeSlot> timeSlotRepository, ICommandRepository<CounselorScheduleDay> counselorScheduleDayRepository, ICommandRepository<CounselorScheduleSlot> counselorScheduleSlotRepository)
+    public InsertCounselorScheduleCommandHandler(
+        ICommandRepository<CounselorSchedule> counselorScheduleRepository,
+        ICommandRepository<Weekday> weekdayRepository,
+        ICommandRepository<TimeSlot> timeSlotRepository,
+        ICommandRepository<CounselorScheduleDay> counselorScheduleDayRepository,
+        ICommandRepository<CounselorScheduleSlot> counselorScheduleSlotRepository
+    )
     {
         _weekdayRepository = weekdayRepository;
         _timeSlotRepository = timeSlotRepository;
@@ -42,7 +50,10 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<BaseResponse> Handle(InsertCounselorScheduleCommand request, CancellationToken cancellationToken)
+    public async Task<BaseResponse> Handle(
+        InsertCounselorScheduleCommand request,
+        CancellationToken cancellationToken
+    )
     {
         var response = new BaseResponse { Success = false };
 
@@ -69,7 +80,7 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
             var counselorScheduleSlots = new List<CounselorScheduleSlot>();
             var counselorScheduleDayCollections = new List<CounselorScheduleDayCollection>();
             var counselorScheduleSlotCollections = new List<CounselorScheduleSlotCollection>();
-            
+
             // Insert new counselor schedule
             await _counselorScheduleRepository.ExecuteInTransactionAsync(async () =>
             {
@@ -88,33 +99,49 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
                         CounselorEmail = request.CounselorEmail,
                         WeekdayId = day.Id,
                     };
-                
+
                     foreach (var slot in timeSlots)
                     {
                         var counselorScheduleSlot = new CounselorScheduleSlot
                         {
                             ScheduleDayId = counselorScheduleDay.Id,
                             SlotId = slot!.Id,
-                            Status = ((short) ConstantEnum.ScheduleStatus.Available),
+                            Status = ((short)ConstantEnum.ScheduleStatus.Available),
                         };
                         counselorScheduleSlots.Add(counselorScheduleSlot);
-                        counselorScheduleSlotCollections.Add(CounselorScheduleSlotMapper.ToReadModel(counselorScheduleSlot));
+                        counselorScheduleSlotCollections.Add(
+                            CounselorScheduleSlotMapper.ToReadModel(counselorScheduleSlot)
+                        );
                     }
-                
+
                     counselorScheduleDays.Add(counselorScheduleDay);
-                    counselorScheduleDayCollections.Add(CounselorScheduleDayMapper.ToReadModel(counselorScheduleDay));
+                    counselorScheduleDayCollections.Add(
+                        CounselorScheduleDayMapper.ToReadModel(counselorScheduleDay)
+                    );
                 }
 
                 // Add the new counselor schedule days and slots to the repository
                 await _counselorScheduleDayRepository.AddRangeAsync(counselorScheduleDays);
                 await _counselorScheduleSlotRepository.AddRangeAsync(counselorScheduleSlots);
-            
+
                 // Save changes
                 await _counselorScheduleRepository.SaveChangesAsync(request.CounselorEmail);
-                
-                _counselorScheduleRepository.Store(CounselorScheduleMapper.ToReadModel(newCounselorSchedule, request.CounselorName), "Admin");
-                _counselorScheduleDayRepository.StoreRange(counselorScheduleDayCollections,"Admin");
-                _counselorScheduleSlotRepository.StoreRange(counselorScheduleSlotCollections, "Admin");
+
+                _counselorScheduleRepository.Store(
+                    CounselorScheduleMapper.ToReadModel(
+                        newCounselorSchedule,
+                        request.CounselorName
+                    ),
+                    "Admin"
+                );
+                _counselorScheduleDayRepository.StoreRange(
+                    counselorScheduleDayCollections,
+                    "Admin"
+                );
+                _counselorScheduleSlotRepository.StoreRange(
+                    counselorScheduleSlotCollections,
+                    "Admin"
+                );
 
                 await _counselorScheduleRepository.SessionSavechanges();
 
@@ -123,14 +150,13 @@ internal class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCou
                 response.SetMessage(MessageId.I00001);
                 return true;
             });
-           
         }
         catch (Exception ex)
         {
             response.Success = false;
             response.SetMessage(MessageId.E99999);
         }
-        
+
         return response;
     }
 }
