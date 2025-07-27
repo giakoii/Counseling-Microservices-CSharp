@@ -7,7 +7,7 @@ using BuildingBlocks.CQRS;
 using Microsoft.EntityFrameworkCore;
 using RequestTicketService.Application.Dtos;
 using RequestTicketService.Domain.Models;
-using Shared.Application.Repositories;
+using Shared.Application.Interfaces;
 
 namespace RequestTicketService.Application.Queries.Handlers
 {
