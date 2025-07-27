@@ -14,7 +14,7 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/appointment")]
-[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+//[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class AppointmentController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -53,13 +53,69 @@ public class AppointmentController : ControllerBase
     }
     
     /// <summary>
-    /// Select all appointments.
+    /// Select all appointments with pagination.
     /// </summary>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10)</param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<IActionResult> SelectAppointmentsAsync()
+    public async Task<IActionResult> SelectAppointmentsAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var result = await _mediator.Send(new AppointmentSelectsQuery());
+        var query = new AppointmentSelectsQuery
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+        
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
+    
+    /// <summary>
+    /// Select appointment by ID.
+    /// </summary>
+    /// <param name="id">Appointment ID</param>
+    /// <returns></returns>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> SelectAppointmentByAppointmentIdAsync([FromRoute] Guid id)
+    {
+        var query = new AppointmentSelectByIdQuery
+        {
+            AppointmentId = id
+        };
+        
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
+    
+    /// <summary>
+    /// Select appointments by user ID with pagination.
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10)</param>
+    /// <returns></returns>
+    [HttpGet("user/{userId}")]
+    public async Task<IActionResult> SelectAppointmentByUserIdAsync([FromRoute] Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var query = new AppointmentSelectByUserIdQuery
+        {
+            UserId = userId,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+        
+        var result = await _mediator.Send(query);
         if (result.Success)
         {
             return Ok(result);
