@@ -64,6 +64,10 @@ public class AppointmentSelectsQueryHandler : IQueryHandler<AppointmentSelectsQu
             UpdatedAt = appointment.UpdatedAt,
             Counselor = appointment.Counselor,
             User = appointment.User,
+            SlotId = appointment.CounselorSchedule.SlotId,
+            Slot = $"{appointment.CounselorSchedule.StartTime} - {appointment.CounselorSchedule.EndTime}",
+            DayId = appointment.CounselorSchedule.WeekdayId,
+            Weekday = appointment.CounselorSchedule.DayName,
         }).ToList();
         
         // Apply pagination
@@ -98,5 +102,12 @@ public class AppointmentSelectsQueryEntity
     public UserInformation Counselor { get; set; } = null!;
     
     public UserInformation User { get; set; } = null!;
+    
+    public short SlotId { get; set; }
+    
+    public string Slot { get; set; }
+    
+    public short DayId { get; set; }
+    public string Weekday { get; set; }
 }
 

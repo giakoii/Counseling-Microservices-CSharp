@@ -107,6 +107,8 @@ public class AppointmentInsertCommandHandler : ICommandHandler<AppointmentInsert
             
             // Save changes
             await _appointmentRepository.AddAsync(newAppointment);
+            await _appointmentRepository.SaveChangesAsync(currentUser.Email);
+
             
             // Create user information
             var names = currentUser.FullName?.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
@@ -135,7 +137,7 @@ public class AppointmentInsertCommandHandler : ICommandHandler<AppointmentInsert
             await _paymentRepository.AddAsync(newPayment);
             await _paymentRepository.SaveChangesAsync(currentUser.Email);
             
-            var appointmentCollection = AppointmentCollection.FromWriteModel(newAppointment, counselorInf.Counselor, userInformation);
+            var appointmentCollection = AppointmentCollection.FromWriteModel(newAppointment, counselorInf.Counselor, userInformation, true);
             
             // Session save changes
             _appointmentRepository.Store(appointmentCollection, currentUser.Email);
