@@ -78,12 +78,10 @@ builder.Services.AddScoped<
     ICommandHandler<DeleteRequestTicketCommand, bool>,
     DeleteRequestTicketCommandHandler
 >();
-builder.Services.AddScoped<Shared.Infrastructure.Context.AppDbContext>(sp =>
+builder.Services.AddScoped<AppDbContext>(sp =>
     sp.GetRequiredService<RequestTicketServiceContext>()
 );
 
-builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
-builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
 builder.Services.AddScoped<
     ICommandHandler<CreateRequestTicketChatCommand, Guid>,
     CreateRequestTicketChatCommandHandler
@@ -107,6 +105,11 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<AppDbContext>(sp =>
     sp.GetRequiredService<RequestTicketServiceContext>()
 );
+
+// Generic repository registrations
+builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
+builder.Services.AddScoped(typeof(ISqlReadRepository<>), typeof(SqlReadRepository<>));
+builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlRepository<>));
 
 // Allow API to be read from outside
 builder.Services.AddCors(options =>

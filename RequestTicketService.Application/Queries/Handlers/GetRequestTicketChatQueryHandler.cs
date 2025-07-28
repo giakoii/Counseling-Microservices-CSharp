@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BuildingBlocks.CQRS;
+using Marten;
 using Microsoft.EntityFrameworkCore;
 using RequestTicketService.Application.Dtos;
 using RequestTicketService.Domain.Models;
@@ -14,13 +15,11 @@ namespace RequestTicketService.Application.Queries.Handlers
     public class GetRequestTicketChatQueryHandler
         : IQueryHandler<GetRequestTicketChatQuery, RequestTicketChatDto>
     {
-        private readonly ISqlReadRepository<RequestTicketChat> _readRepository;
+        private readonly IQuerySession _querySession;
 
-        public GetRequestTicketChatQueryHandler(
-            ISqlReadRepository<RequestTicketChat> readRepository
-        )
+        public GetRequestTicketChatQueryHandler(IQuerySession querySession)
         {
-            _readRepository = readRepository;
+            _querySession = querySession;
         }
 
         public async Task<RequestTicketChatDto> Handle(
@@ -28,9 +27,12 @@ namespace RequestTicketService.Application.Queries.Handlers
             CancellationToken cancellationToken
         )
         {
-            var chat = await _readRepository
-                .GetView<RequestTicketChat>()
-                .FirstOrDefaultAsync(c => c.ChatId == query.ChatId, cancellationToken);
+            var chat = await _querySession.LoadAsync<RequestTicketChat>(
+                query.ChatId,
+                cancellationToken
+            );
+            if (chat == null || !chat.IsActive)
+                throw new Exception("Chat not found");
 
             return new RequestTicketChatDto
             {
