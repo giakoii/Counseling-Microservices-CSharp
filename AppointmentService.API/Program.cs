@@ -3,15 +3,18 @@ using System.Text.Json.Serialization;
 using AppointmentService.Application.CounselorSchedules.Commands;
 using AppointmentService.Application.CounselorSchedules.Consumers;
 using AppointmentService.Application.CounselorSchedules.Queries;
+using AppointmentService.Application.PaymentServices;
 using AppointmentService.Domain.ReadModels;
 using AppointmentService.Domain.WriteModels;
 using AppointmentService.Infrastructure.Data.Contexts;
+using AppointmentService.Infrastructure.PaymentServices;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.Utils.Const;
 using DotNetEnv;
 using JasperFx;
 using Marten;
 using MassTransit;
+using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using OpenIddict.Validation.AspNetCore;
@@ -109,6 +112,7 @@ builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlReposito
 builder.Services.AddScoped<ICommandRepository<CounselorScheduleDetail>, CommandRepository<CounselorScheduleDetail>>();
 builder.Services.AddScoped<ICommandRepository<Weekday>, CommandRepository<Weekday>>();
 builder.Services.AddScoped<ICommandRepository<TimeSlot>, CommandRepository<TimeSlot>>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 #endregion
 
@@ -124,7 +128,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddOpenIddict()
     .AddValidation(options =>
     {
-        options.SetIssuer($"https://localhost:5001/");
+        options.SetIssuer($"http://localhost:5050/");
         options.AddAudiences("service_client");
 
         options.UseIntrospection()
@@ -164,6 +168,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 #endregion
 
 #region CORS
@@ -199,6 +208,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UsePathBase("/appointments");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

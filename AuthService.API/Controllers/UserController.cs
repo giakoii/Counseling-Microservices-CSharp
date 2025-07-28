@@ -45,6 +45,15 @@ public class UserController : ControllerBase
     public async Task<IActionResult> InsertUser([FromBody] InsertUserCommand request)
     {
         var response = new BaseCommandResponse { Success = false };
+        
+        // Error check request
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        
         try
         {
             response = await _mediator.Send(request);
@@ -68,6 +77,14 @@ public class UserController : ControllerBase
     public async Task<IActionResult> InsertCounselor([FromBody] InsertCounselorCommand request)
     {
         var response = new BaseCommandResponse { Success = false };
+        
+        // Error check request
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
         try
         {
             response = await _mediator.Send(request);
@@ -135,6 +152,65 @@ public class UserController : ControllerBase
             return Unauthorized(result);
         }
         return Ok(result);
+    }
+    
+    /// <summary>
+    /// Update user information
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPut("[action]")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserCommand request)
+    {
+        var response = new BaseCommandResponse { Success = false };
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        try
+        {
+            response = await _mediator.Send(request);
+            if (response.MessageId == MessageId.E11001)
+            {
+                return Unauthorized(response);
+            }
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            response.SetMessage(MessageId.E99999);
+            return BadRequest(response);
+        }
+    }
+    
+    [HttpPatch("[action]")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand request)
+    {
+        var response = new BaseCommandResponse { Success = false };
+        var errorList = AbstractFunction<BaseCommandResponse, string>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        try
+        {
+            response = await _mediator.Send(request);
+            if (response.MessageId == MessageId.E11001)
+            {
+                return Unauthorized(response);
+            }
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            response.SetMessage(MessageId.E99999);
+            return BadRequest(response);
+        }
     }
 
     /// <summary>

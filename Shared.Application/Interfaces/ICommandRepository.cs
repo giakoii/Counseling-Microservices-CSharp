@@ -32,7 +32,7 @@ public interface ICommandRepository<TEntity> where TEntity : class
     /// <param name="updatedBy"></param>
     /// <param name="isModified"></param>
     /// <typeparam name="TCollection"></typeparam>
-    void Store<TCollection>(TCollection entity, string updatedBy, bool isModified = false) where TCollection : class;
+    void Store<TCollection>(TCollection entity, string updatedBy, bool isModified = false, bool needLogicalDelete = false) where TCollection : class;
 
     /// <summary>
     /// Store a range of entities in the marten.

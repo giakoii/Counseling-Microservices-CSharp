@@ -23,8 +23,8 @@ public partial class Appointment
     public DateTime UpdatedAt { get; set; }
 
     public string UpdatedBy { get; set; } = null!;
-    
-    public virtual CounselorScheduleDetail? Schedule { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public virtual CounselorScheduleDetail Schedule { get; set; } = null!;
 }
