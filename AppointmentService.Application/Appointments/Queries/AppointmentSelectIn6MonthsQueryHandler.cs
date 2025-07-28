@@ -17,17 +17,14 @@ public class AppointmentSelectIn6MonthsQuery : IQuery<AppointmentSelectIn6Months
 public class AppointmentSelectIn6MonthsQueryHandler : IQueryHandler<AppointmentSelectIn6MonthsQuery, AppointmentSelectIn6MonthsQueryResponse>
 {
     private readonly INoSqlQueryRepository<AppointmentCollection> _appointmentRepository;
-    private readonly IIdentityService _identityService;
 
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="appointmentRepository"></param>
-    /// <param name="identityService"></param>
-    public AppointmentSelectIn6MonthsQueryHandler(INoSqlQueryRepository<AppointmentCollection> appointmentRepository, IIdentityService identityService)
+    public AppointmentSelectIn6MonthsQueryHandler(INoSqlQueryRepository<AppointmentCollection> appointmentRepository)
     {
         _appointmentRepository = appointmentRepository;
-        _identityService = identityService;
     }
     
     public async Task<AppointmentSelectIn6MonthsQueryResponse> Handle(AppointmentSelectIn6MonthsQuery request, CancellationToken cancellationToken)
@@ -36,8 +33,6 @@ public class AppointmentSelectIn6MonthsQueryHandler : IQueryHandler<AppointmentS
         
         try
         {
-            var currentUser = _identityService.GetCurrentUser();
-            var userId = Guid.Parse(currentUser.UserId);
             var today = DateOnly.FromDateTime(DateTime.Now);
             
             // Calculate the start date (first day of the month 5 months ago)
@@ -46,9 +41,8 @@ public class AppointmentSelectIn6MonthsQueryHandler : IQueryHandler<AppointmentS
             // Get all appointments from start date to end of current month
             var endOfCurrentMonth = new DateOnly(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
             
-            // Get appointments for the user or counselor
+            // Get all active appointments in the date range
             var appointments = await _appointmentRepository.FindAllAsync(x => 
-                (x.UserId == userId || x.CounselorId == userId) && 
                 x.IsActive && 
                 x.AppointmentDate >= startDate && 
                 x.AppointmentDate <= endOfCurrentMonth);
