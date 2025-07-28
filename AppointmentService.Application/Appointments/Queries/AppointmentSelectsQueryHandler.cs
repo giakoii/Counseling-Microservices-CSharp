@@ -7,7 +7,7 @@ using Shared.Application.Interfaces;
 
 namespace AppointmentService.Application.Appointments.Queries;
 
-public class AppointmentSelectsQuery : IQuery<AppointmentSelectsQueryResponse>
+public record AppointmentSelectsQuery : IQuery<AppointmentSelectsQueryResponse>
 {
     
 }
