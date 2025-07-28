@@ -220,3 +220,6 @@ app.UseSwaggerUi();
 app.Run();
 
 #endregion
+
+// Register background service
+builder.Services.AddHostedService<AppointmentService.API.Services.ResetCounselorScheduleStatusService>();
