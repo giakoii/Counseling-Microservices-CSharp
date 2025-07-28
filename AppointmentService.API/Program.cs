@@ -3,9 +3,11 @@ using System.Text.Json.Serialization;
 using AppointmentService.Application.CounselorSchedules.Commands;
 using AppointmentService.Application.CounselorSchedules.Consumers;
 using AppointmentService.Application.CounselorSchedules.Queries;
+using AppointmentService.Application.PaymentServices;
 using AppointmentService.Domain.ReadModels;
 using AppointmentService.Domain.WriteModels;
 using AppointmentService.Infrastructure.Data.Contexts;
+using AppointmentService.Infrastructure.PaymentServices;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.Utils.Const;
 using DotNetEnv;
@@ -110,6 +112,7 @@ builder.Services.AddScoped(typeof(INoSqlQueryRepository<>), typeof(NoSqlReposito
 builder.Services.AddScoped<ICommandRepository<CounselorScheduleDetail>, CommandRepository<CounselorScheduleDetail>>();
 builder.Services.AddScoped<ICommandRepository<Weekday>, CommandRepository<Weekday>>();
 builder.Services.AddScoped<ICommandRepository<TimeSlot>, CommandRepository<TimeSlot>>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 #endregion
 

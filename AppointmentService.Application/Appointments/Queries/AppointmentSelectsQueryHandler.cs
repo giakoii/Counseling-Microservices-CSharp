@@ -8,7 +8,7 @@ using Shared.Infrastructure.Helpers;
 
 namespace AppointmentService.Application.Appointments.Queries;
 
-public class AppointmentSelectsQuery : IQuery<AppointmentSelectsQueryResponse>
+public record AppointmentSelectsQuery : IQuery<AppointmentSelectsQueryResponse>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;

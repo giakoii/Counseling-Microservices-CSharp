@@ -1,10 +1,6 @@
 using AppointmentService.Application.CounselorSchedules.Queries;
-using Common;
-using Common.Utils.Const;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenIddict.Validation.AspNetCore;
 
 namespace AppointmentService.API.Controllers;
 
@@ -30,15 +26,10 @@ public class CounselorScheduleController : ControllerBase
     /// <param name="pageSize">Page size (default: 10)</param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<IActionResult> SelectCounselorSchedulesAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> SelectCounselorSchedulesAsync()
     {
-        var query = new SelectCounselorSchedulesQuery
-        {
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        };
         
-        var result = await _mediator.Send(query);
+        var result = await _mediator.Send(new SelectCounselorSchedulesQuery());
         if (result.Success)
         {
             return Ok(result);

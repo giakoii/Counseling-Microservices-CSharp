@@ -5,7 +5,7 @@ using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
-using Microsoft.EntityFrameworkCore;
+using Marten;
 using Shared.Application.Interfaces;
 
 namespace AppointmentService.Application.Appointments.Commands;
@@ -47,7 +47,7 @@ public class AppointmentUpdateStatusCommandHandler : ICommandHandler<Appointment
 
         // Retrieve the appointment
         var appointmentCollection = await _appointmentRepository.FindOneAsync(x => x.Id == request.AppointmentId && x.IsActive);
-        var appointment = await _commandRepository.Find(x => x.AppointmentId == request.AppointmentId && x.IsActive).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var appointment = await _commandRepository.Find(x => x.AppointmentId == request.AppointmentId && x.IsActive).FirstOrDefaultAsync(token: cancellationToken);
         if (appointment == null || appointmentCollection == null)
         {
             response.SetMessage(MessageId.I00000, "Appointment not found.");

@@ -2,12 +2,14 @@ using System.Net;
 using System.Text.Json.Serialization;
 using AuthService.API;
 using AuthService.API.Utils.Const;
+using AuthService.Application.Services;
 using AuthService.Application.Users.Commands;
 using AuthService.Application.Users.Consumers;
 using AuthService.Application.Users.Queries;
 using AuthService.Domain.ReadModels;
 using AuthService.Domain.WriteModels;
 using AuthService.Infrastructure.Data.Contexts;
+using AuthService.Infrastructure.Services;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using DotNetEnv;
 using JasperFx;
@@ -69,6 +71,7 @@ builder.Services.AddScoped<ICommandRepository<User>, CommandRepository<User>>();
 builder.Services.AddScoped<ICommandRepository<Role>, CommandRepository<Role>>();
 
 builder.Services.AddScoped<ISendmailService, SendmailService>();
+builder.Services.AddScoped<IUploadImageService, CloudinaryLogic>();
 builder.Services.AddHttpContextAccessor();
 
 // Add MassTransit with RabbitMQ

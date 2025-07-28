@@ -18,17 +18,13 @@ internal class InsertCounselorScheduleCommandHandler
     private readonly ICommandRepository<CounselorScheduleDetail> _counselorScheduleRepository;
     private readonly ICommandRepository<Weekday> _weekdayRepository;
     private readonly ICommandRepository<TimeSlot> _timeSlotRepository;
-
+    
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="weekdayRepository"></param>
     /// <param name="timeSlotRepository"></param>
-    public InsertCounselorScheduleCommandHandler(
-        ICommandRepository<Weekday> weekdayRepository,
-        ICommandRepository<TimeSlot> timeSlotRepository,
-        ICommandRepository<CounselorScheduleDetail> counselorScheduleRepository
-    )
+    public InsertCounselorScheduleCommandHandler(ICommandRepository<Weekday> weekdayRepository, ICommandRepository<TimeSlot> timeSlotRepository, ICommandRepository<CounselorScheduleDetail> counselorScheduleRepository)
     {
         _weekdayRepository = weekdayRepository;
         _timeSlotRepository = timeSlotRepository;
@@ -95,13 +91,7 @@ internal class InsertCounselorScheduleCommandHandler
 
                 foreach (var scheduleDetail in counselorSchedules)
                 {
-                    _counselorScheduleRepository.Store(
-                        CounselorScheduleDetailCollection.FromWriteModel(
-                            scheduleDetail,
-                            request.Counselor
-                        ),
-                        "Admin"
-                    );
+                    _counselorScheduleRepository.Store(CounselorScheduleDetailCollection.FromWriteModel(scheduleDetail, request.Counselor), "Admin");
                 }
                 await _counselorScheduleRepository.SessionSavechanges();
 
@@ -110,13 +100,14 @@ internal class InsertCounselorScheduleCommandHandler
                 response.SetMessage(MessageId.I00001);
                 return true;
             });
+           
         }
         catch (Exception ex)
         {
             response.Success = false;
             response.SetMessage(MessageId.E99999);
         }
-
+        
         return response;
     }
 }

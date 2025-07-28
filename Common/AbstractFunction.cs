@@ -37,10 +37,7 @@ public class AbstractFunction<U, V>
             keyReplace = Regex.Replace(keyReplace, @"^Value\[\d+\]\.", "");
 
             // Get error message
-            var errorMessage = string.Join(
-                "; ",
-                modelStateEntity.Errors.Select(e => e.ErrorMessage)
-            );
+            var errorMessage = string.Join("; ", modelStateEntity.Errors.Select(e => e.ErrorMessage));
 
             var detailError = new DetailError();
             Match matchesKey;
