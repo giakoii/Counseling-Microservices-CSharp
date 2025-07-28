@@ -7,9 +7,7 @@ using Shared.Application.Interfaces;
 namespace AppointmentService.Application.CounselorSchedules.Queries;
 public record SelectCounselorSchedulesQuery : IQuery<SelectCounselorSchedulesResponse>;
 
-public class
-    SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselorSchedulesQuery,
-    SelectCounselorSchedulesResponse>
+public class SelectCounselorSchedulesQueryHandler : IQueryHandler<SelectCounselorSchedulesQuery, SelectCounselorSchedulesResponse>
 {
     private readonly INoSqlQueryRepository<CounselorScheduleDetailCollection> _counselorScheduleRepository;
 

@@ -40,6 +40,8 @@ public class AppointmentCollection
     
     public UserInformation User { get; set; } = null!;
     
+    public CounselorScheduleDetailCollection CounselorSchedule { get; set; }
+    
     public static AppointmentCollection FromWriteModel(Appointment model, UserInformation counselorInf, UserInformation userInf, bool includeRelated = false)
     {
         var result = new AppointmentCollection
@@ -57,6 +59,14 @@ public class AppointmentCollection
             User = userInf,
             UserId = userInf.Id
         };
+
+        if (includeRelated)
+        {
+            if (model.Schedule != null)
+            {
+                result.CounselorSchedule = CounselorScheduleDetailCollection.FromWriteModel(model.Schedule, userInf);
+            }
+        }
 
         return result;
     }

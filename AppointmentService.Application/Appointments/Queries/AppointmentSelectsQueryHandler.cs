@@ -76,6 +76,10 @@ public class AppointmentSelectsQueryHandler : IQueryHandler<AppointmentSelectsQu
             UpdatedAt = appointment.UpdatedAt,
             Counselor = appointment.Counselor,
             User = appointment.User,
+            SlotId = appointment.CounselorSchedule.SlotId,
+            Slot = $"{appointment.CounselorSchedule.StartTime} - {appointment.CounselorSchedule.EndTime}",
+            DayId = appointment.CounselorSchedule.WeekdayId,
+            Weekday = appointment.CounselorSchedule.DayName,
         }).ToList();
         
         // Apply pagination
@@ -181,17 +185,21 @@ public class AppointmentSelectByUserIdQueryHandler : IQueryHandler<AppointmentSe
             }
             
             // Map appointments to response entities
-            var appointmentEntities = appointments.Select(appointment => new AppointmentSelectsQueryEntity
-            {
-                Id = appointment.Id,
-                CounselorId = appointment.CounselorId,
-                AppointmentDate = appointment.AppointmentDate,
-                Status = appointment.Status,
-                CreatedAt = appointment.CreatedAt,
-                UpdatedAt = appointment.UpdatedAt,
-                Counselor = appointment.Counselor,
-                User = appointment.User,
-            }).OrderByDescending(x => x.AppointmentDate).ToList();
+            var appointmentEntities = appointments
+                .Select(appointment => new AppointmentSelectsQueryEntity
+                {
+                    Id = appointment.Id,
+                    CounselorId = appointment.CounselorId,
+                    AppointmentDate = appointment.AppointmentDate,
+                    Status = appointment.Status,
+                    CreatedAt = appointment.CreatedAt,
+                    UpdatedAt = appointment.UpdatedAt,
+                    Counselor = appointment.Counselor,
+                    User = appointment.User,
+                })
+                .OrderBy(x => x.Status != (int) ConstantEnum.AppointmentStatus.Booked)
+                .ThenBy(x => x.AppointmentDate)
+                .ToList();    
             
             // Apply pagination
             var paginatedResult = await PaginationHelper.PaginateAsync(appointmentEntities, request.PageNumber, request.PageSize);
@@ -242,5 +250,12 @@ public class AppointmentSelectsQueryEntity
     public UserInformation Counselor { get; set; } = null!;
     
     public UserInformation User { get; set; } = null!;
+    
+    public short SlotId { get; set; }
+    
+    public string Slot { get; set; }
+    
+    public short DayId { get; set; }
+    public string Weekday { get; set; }
 }
 
