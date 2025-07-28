@@ -2,6 +2,7 @@ using System.Security.Claims;
 using AuthService.API.Helpers;
 using AuthService.Application.Users.Commands;
 using AuthService.Application.Users.Queries;
+using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common;
 using Common.Utils.Const;
 using MediatR;
@@ -209,6 +210,42 @@ public class UserController : ControllerBase
         catch (Exception e)
         {
             response.SetMessage(MessageId.E99999);
+            return BadRequest(response);
+        }
+    }
+
+    /// <summary>
+    /// Get all active consultants/counselors with pagination
+    /// </summary>
+    /// <param name="pageNumber">Page number (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10)</param>
+    /// <returns></returns>
+    [HttpGet("consultants")]
+    public async Task<IActionResult> SelectConsultants([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var query = new SelectCounselorWithPagingQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            var result = await _mediator.Send(query);
+            
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            
+            return BadRequest(result);
+        }
+        catch (Exception ex)
+        {
+            var response = new SelectCounselorWithPagingResponse 
+            { 
+                Success = false, 
+                Message = ex.Message 
+            };
             return BadRequest(response);
         }
     }

@@ -125,6 +125,24 @@ public class AppointmentController : ControllerBase
     }
     
     /// <summary>
+    /// Select appointment statistics for the last 6 months and today.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("statistics/6-months")]
+    public async Task<IActionResult> SelectAppointmentIn6MonthsAsync()
+    {
+        var query = new AppointmentSelectIn6MonthsQuery();
+        
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
+    
+    /// <summary>
     /// Update the status of an appointment.
     /// </summary>
     /// <param name="id"></param>
