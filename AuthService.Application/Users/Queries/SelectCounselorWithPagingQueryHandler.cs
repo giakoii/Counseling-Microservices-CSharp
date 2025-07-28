@@ -31,8 +31,9 @@ public class SelectCounselorWithPagingQueryHandler : IQueryHandler<SelectCounsel
             var result = await _userRepository.FindAllAsync(x => x.IsActive);
             var counselors = result
                 .Where(x => x.RoleInf?.Name == ConstantEnum.Role.Consultant.ToString())
-                .Select(x => new CounselorInformation
+                .Select(x => new CounselorWithId
                 {
+                    Id = x.Id,
                     Email = x.Email,
                     FirstName = x.FirstName,
                     LastName = x.LastName,
@@ -66,5 +67,16 @@ public class SelectCounselorWithPagingResponse
     
     public string Message { get; set; } = null!;
     
-    public PagedResult<CounselorInformation> Response { get; set; } = new();
+    public PagedResult<CounselorWithId> Response { get; set; } = new();
+}
+
+public class CounselorWithId
+{
+    public Guid Id { get; set; }
+    
+    public string Email { get; set; } = null!;
+    
+    public string FirstName { get; set; } = null!;
+    
+    public string LastName { get; set; } = null!;
 }

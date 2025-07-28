@@ -15,41 +15,30 @@ public record AppointmentSelectsQuery : IQuery<AppointmentSelectsQueryResponse>
 }
 
 /// <summary>
-/// AppointmentSelectsQueryHandler - Handles the retrieval of appointment selections by user or counselor.
+/// AppointmentSelectsQueryHandler - Handles the retrieval of all appointment selections.
 /// </summary>
 public class AppointmentSelectsQueryHandler : IQueryHandler<AppointmentSelectsQuery, AppointmentSelectsQueryResponse>
 {
     private readonly INoSqlQueryRepository<AppointmentCollection> _appointmentRepository;
-    private readonly IIdentityService _identityService;
 
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="appointmentRepository"></param>
-    /// <param name="identityService"></param>
-    public AppointmentSelectsQueryHandler(INoSqlQueryRepository<AppointmentCollection> appointmentRepository, IIdentityService identityService)
+    public AppointmentSelectsQueryHandler(INoSqlQueryRepository<AppointmentCollection> appointmentRepository)
     {
         _appointmentRepository = appointmentRepository;
-        _identityService = identityService;
     }
     
     public async Task<AppointmentSelectsQueryResponse> Handle(AppointmentSelectsQuery request, CancellationToken cancellationToken)
     {
         var response = new AppointmentSelectsQueryResponse {Success = false};
-        
-        var currentUser = _identityService.GetCurrentUser();
-        
-        // Select all appointments by user
-        var appointments = await _appointmentRepository.FindAllAsync(x => x.UserId == Guid.Parse(currentUser.UserId) && x.IsActive);
-        if (!appointments.Any())
-        {
-            // If no appointments found for user, check if the user is a counselor
-            appointments = await _appointmentRepository.FindAllAsync(x => x.CounselorId == Guid.Parse(currentUser.UserId) && x.IsActive);
-        }
+        var allAppointments = await _appointmentRepository.FindAllAsync();
+        var appointments = allAppointments.Where(x => x.IsActive).ToList();
         
         if (!appointments.Any())
         {
-            response.SetMessage(MessageId.I00000, "No appointments found for the user.");
+            response.SetMessage(MessageId.I00000, $"No active appointments found. Total appointments in DB: {allAppointments.Count}");
             return response;
         }
         
@@ -105,9 +94,10 @@ public class AppointmentSelectsQueryEntity
     
     public short SlotId { get; set; }
     
-    public string Slot { get; set; }
+    public string Slot { get; set; } = string.Empty;
     
     public short DayId { get; set; }
-    public string Weekday { get; set; }
+
+    public string Weekday { get; set; } = string.Empty;
 }
 
