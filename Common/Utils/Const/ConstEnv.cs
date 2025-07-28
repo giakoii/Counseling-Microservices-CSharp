@@ -23,4 +23,10 @@ public class ConstEnv
     public const string PayOsApiKey = "PAYOS_API_KEY";
     
     public const string PayOsCheckSumKey = "PAYOS_CHECKSUM_KEY";
+    
+    public const string CloudinaryCloudName = "CLOUD_NAME";
+    
+    public const string CloudApiKey = "CLOUD_APIKEY";
+    
+    public const string CloudApiSecret = "CLOUD_APISECRET";
 }
