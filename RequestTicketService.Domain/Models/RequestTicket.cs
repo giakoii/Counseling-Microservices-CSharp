@@ -1,7 +1,10 @@
-﻿namespace RequestTicketService.Domain.Models;
+﻿using Marten.Schema;
+
+namespace RequestTicketService.Domain.Models;
 
 public partial class RequestTicket
 {
+    [Identity]
     public Guid TicketId { get; set; }
 
     public Guid StudentId { get; set; }
@@ -32,5 +35,6 @@ public partial class RequestTicket
 
     public string UpdatedBy { get; set; } = null!;
 
-    public virtual ICollection<RequestTicketChat> RequestTicketChats { get; set; } = new List<RequestTicketChat>();
+    public virtual ICollection<RequestTicketChat> RequestTicketChats { get; set; } =
+        new List<RequestTicketChat>();
 }

@@ -1,43 +1,43 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using BuildingBlocks.CQRS;
+﻿using BuildingBlocks.CQRS;
+using Marten;
+using RequestTicketService.Application.Commands;
 using RequestTicketService.Domain.Models;
-using RequestTicketService.Infrastructure.Data.Contexts;
 
 namespace RequestTicketService.Application.Commands.Handlers
 {
     public class CreateRequestTicketCommandHandler
         : ICommandHandler<CreateRequestTicketCommand, Guid>
     {
-        private readonly RequestTicketServiceContext _context;
+        private readonly Marten.IDocumentSession _documentSession;
 
-        public CreateRequestTicketCommandHandler(RequestTicketServiceContext context)
+        public CreateRequestTicketCommandHandler(IDocumentSession documentSession)
         {
-            _context = context;
+            _documentSession = documentSession;
         }
 
         public async Task<Guid> Handle(
-            CreateRequestTicketCommand command,
+            CreateRequestTicketCommand request,
             CancellationToken cancellationToken
         )
         {
             var ticket = new RequestTicket
             {
                 TicketId = Guid.NewGuid(),
-                StudentId = command.StudentId,
-                Title = command.Title,
-                Description = command.Description,
-                PriorityId = command.PriorityId,
-                Category = command.Category,
-                CreatedBy = command.CreatedBy,
+                StudentId = request.StudentId,
+                Title = request.Title,
+                Description = request.Description,
+                PriorityId = request.PriorityId,
+                Category = request.Category,
+                StatusId = 1,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedBy = command.CreatedBy,
+                IsActive = true,
                 UpdatedAt = DateTime.UtcNow,
+                CreatedBy = "system",
+                UpdatedBy = "system",
             };
 
-            await _context.RequestTickets.AddAsync(ticket, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            _documentSession.Store(ticket);
+            await _documentSession.SaveChangesAsync();
 
             return ticket.TicketId;
         }
