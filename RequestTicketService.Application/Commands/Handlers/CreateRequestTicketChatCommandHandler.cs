@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using BuildingBlocks.CQRS;
+using Marten;
 using RequestTicketService.Application.Commands;
 using RequestTicketService.Domain.Models;
 using Shared.Application.Interfaces;
@@ -11,13 +12,11 @@ namespace RequestTicketService.Application.Commands.Handlers
     public class CreateRequestTicketChatCommandHandler
         : ICommandHandler<CreateRequestTicketChatCommand, Guid>
     {
-        private readonly ICommandRepository<RequestTicketChat> _commandRepository;
+        private readonly IDocumentSession _documentSession;
 
-        public CreateRequestTicketChatCommandHandler(
-            ICommandRepository<RequestTicketChat> commandRepository
-        )
+        public CreateRequestTicketChatCommandHandler(IDocumentSession documentSession)
         {
-            _commandRepository = commandRepository;
+            _documentSession = documentSession;
         }
 
         public async Task<Guid> Handle(
@@ -40,8 +39,8 @@ namespace RequestTicketService.Application.Commands.Handlers
                 UpdatedAt = DateTime.UtcNow,
                 UpdatedBy = command.UserId.ToString(),
             };
-            await _commandRepository.AddAsync(chat);
-            await _commandRepository.SaveChangesAsync(command.UserId.ToString());
+            _documentSession.Store(chat);
+            await _documentSession.SaveChangesAsync(cancellationToken);
             return chat.ChatId;
         }
     }
