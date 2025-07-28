@@ -5,7 +5,6 @@ using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
 namespace AppointmentService.Application.CounselorSchedules.Queries;
-
 public record SelectCounselorSchedulesQuery : IQuery<SelectCounselorSchedulesResponse>;
 
 public class
@@ -117,16 +116,18 @@ public class
     }
 }
 
+
+
 public class SelectCounselorSchedulesResponse : AbstractResponse<List<SelectCounselorSchedulesEntity>>
 {
-    public override List<SelectCounselorSchedulesEntity> Response { get; set; }
+    public override List<SelectCounselorSchedulesEntity> Response { get; set; } = new();
 }
 
 public class SelectCounselorSchedulesEntity
 {
     public Guid ScheduleId { get; set; }
 
-    public string CounselorEmail { get; set; } = null!;
+    public string CounselorEmail { get; set; }
 
     public string CounselorName { get; set; } = null!;
 
