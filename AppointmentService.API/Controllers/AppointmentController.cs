@@ -105,7 +105,7 @@ public class AppointmentController : ControllerBase
     /// <param name="pageNumber">Page number (default: 1)</param>
     /// <param name="pageSize">Page size (default: 10)</param>
     /// <returns></returns>
-    [HttpGet("user/{userId}")]
+    [HttpGet("user/{id}")]
     public async Task<IActionResult> SelectAppointmentByUserIdAsync([FromRoute] Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var query = new AppointmentSelectByUserIdQuery

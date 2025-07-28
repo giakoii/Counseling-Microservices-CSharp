@@ -156,6 +156,38 @@ public class UserController : ControllerBase
     }
     
     /// <summary>
+    /// Select user by ID
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpGet("{id}")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> SelectUserById([FromRoute] Guid id)
+    {
+        var response = new SelectUserResponse { Success = false };
+        var errorList = AbstractFunction<SelectUserResponse, SelectUserProfileEntity>.ErrorCheck(ModelState);
+        if (errorList.Count > 0)
+        {
+            response.SetMessage(MessageId.E10000);
+            return BadRequest(response);
+        }
+        try
+        {
+            response = await _mediator.Send(new SelectUserQuery { UserId = id });
+            if (response.MessageId == MessageId.E11001)
+            {
+                return Unauthorized(response);
+            }
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            response.SetMessage(MessageId.E99999);
+            return BadRequest(response);
+        }
+    }
+    
+    /// <summary>
     /// Update user information
     /// </summary>
     /// <param name="request"></param>
