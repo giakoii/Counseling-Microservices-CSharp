@@ -1,6 +1,8 @@
 using AppointmentService.Application.CounselorSchedules.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Validation.AspNetCore;
 
 namespace AppointmentService.API.Controllers;
 
@@ -9,7 +11,7 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/counselor-schedule")]
-//[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class CounselorScheduleController : ControllerBase
 {
     private readonly IMediator _mediator;

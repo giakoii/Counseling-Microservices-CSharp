@@ -14,7 +14,7 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/appointment")]
-//[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class AppointmentController : ControllerBase
 {
     private readonly IMediator _mediator;
