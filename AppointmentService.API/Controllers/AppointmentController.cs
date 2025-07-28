@@ -14,7 +14,7 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/appointment")]
-[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+//[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class AppointmentController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -114,6 +114,24 @@ public class AppointmentController : ControllerBase
             PageNumber = pageNumber,
             PageSize = pageSize
         };
+        
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        
+        return BadRequest(result);
+    }
+    
+    /// <summary>
+    /// Select appointment statistics for the last 6 months and today.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("statistics/6-months")]
+    public async Task<IActionResult> SelectAppointmentIn6MonthsAsync()
+    {
+        var query = new AppointmentSelectIn6MonthsQuery();
         
         var result = await _mediator.Send(query);
         if (result.Success)
