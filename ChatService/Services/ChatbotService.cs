@@ -55,7 +55,7 @@ Please provide a helpful answer based only on the context provided above. And pl
                 },
                     generationConfig = new
                     {
-                        temperature = 0.2,
+                        temperature = 0.2, 
                         maxOutputTokens = 200,
                         topP = 0.8,
                         topK = 10

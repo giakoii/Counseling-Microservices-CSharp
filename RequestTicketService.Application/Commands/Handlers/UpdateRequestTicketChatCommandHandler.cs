@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BuildingBlocks.CQRS;
+using Marten;
 using Microsoft.EntityFrameworkCore;
 using RequestTicketService.Domain.Models;
 using Shared.Application.Interfaces;
@@ -13,16 +14,11 @@ namespace RequestTicketService.Application.Commands.Handlers
     public class UpdateRequestTicketChatCommandHandler
         : ICommandHandler<UpdateRequestTicketChatCommand, bool>
     {
-        private readonly ICommandRepository<RequestTicketChat> _commandRepository;
-        private readonly ISqlReadRepository<RequestTicketChat> _readRepository;
+        private readonly IDocumentSession _documentSession;
 
-        public UpdateRequestTicketChatCommandHandler(
-            ICommandRepository<RequestTicketChat> commandRepository,
-            ISqlReadRepository<RequestTicketChat> readRepository
-        )
+        public UpdateRequestTicketChatCommandHandler(IDocumentSession documentSession)
         {
-            _commandRepository = commandRepository;
-            _readRepository = readRepository;
+            _documentSession = documentSession;
         }
 
         public async Task<bool> Handle(
@@ -30,10 +26,11 @@ namespace RequestTicketService.Application.Commands.Handlers
             CancellationToken cancellationToken
         )
         {
-            var chat = await _readRepository
-                .GetView<RequestTicketChat>()
-                .FirstOrDefaultAsync(c => c.ChatId == command.ChatId, cancellationToken);
-            if (chat == null)
+            var chat = await _documentSession.LoadAsync<RequestTicketChat>(
+                command.ChatId,
+                cancellationToken
+            );
+            if (chat == null || !chat.IsActive)
                 return false;
 
             chat.Message = command.Message;
@@ -41,10 +38,9 @@ namespace RequestTicketService.Application.Commands.Handlers
             chat.FileUrl = command.FileUrl;
             chat.IsInternal = command.IsInternal;
             chat.UpdatedAt = DateTime.UtcNow;
-            chat.UpdatedBy = "System";
+            chat.UpdatedBy = command.ChatId.ToString();
 
-            _commandRepository.Update(chat);
-            await _commandRepository.SaveChangesAsync(chat.UpdatedBy);
+            await _documentSession.SaveChangesAsync(cancellationToken);
             return true;
         }
     }

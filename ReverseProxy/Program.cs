@@ -20,6 +20,7 @@ app.UseSwaggerUi(settings =>
     settings.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute("Auth Service", "/auth/swagger/v1/swagger.json"));
     settings.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute("Appointment Service", "/appointments/swagger/v1/swagger.json"));
     settings.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute("Request Ticket Service", "/request-tickets/swagger/v1/swagger.json"));
+    settings.SwaggerRoutes.Add(new NSwag.AspNetCore.SwaggerUiRoute("Chat Service", "/chat/swagger/v1/swagger.json"));
     settings.Path = "/swagger";
 });
 app.UseAuthorization();

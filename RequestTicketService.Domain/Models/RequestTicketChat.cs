@@ -1,7 +1,10 @@
-﻿namespace RequestTicketService.Domain.Models;
+﻿using Marten.Schema;
+
+namespace RequestTicketService.Domain.Models;
 
 public partial class RequestTicketChat
 {
+    [Identity]
     public Guid ChatId { get; set; }
 
     public Guid TicketId { get; set; }
