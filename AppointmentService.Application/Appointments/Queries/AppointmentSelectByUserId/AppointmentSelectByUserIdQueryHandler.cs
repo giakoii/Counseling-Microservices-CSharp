@@ -1,19 +1,13 @@
+using AppointmentService.Application.Appointments.Queries.AppointmentSelects;
 using AppointmentService.Domain.ReadModels;
-using AppointmentService.Domain.Snapshorts;
 using BuildingBlocks.CQRS;
-using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 using Shared.Infrastructure.Helpers;
 
-namespace AppointmentService.Application.Appointments.Queries;
+namespace AppointmentService.Application.Appointments.Queries.AppointmentSelectByUserId;
 
-public class AppointmentSelectByUserIdQuery : IQuery<AppointmentSelectByUserIdQueryResponse>
-{
-    public Guid UserId { get; set; }
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
-}
+
 
 /// <summary>
 /// AppointmentSelectByUserIdQueryHandler - Handles the retrieval of appointments by specific user ID.
@@ -76,7 +70,4 @@ public class AppointmentSelectByUserIdQueryHandler : IQueryHandler<AppointmentSe
     }
 }
 
-public class AppointmentSelectByUserIdQueryResponse : AbstractResponse<PagedResult<AppointmentSelectsQueryEntity>>
-{
-    public override PagedResult<AppointmentSelectsQueryEntity> Response { get; set; } = new();
-}
+

@@ -1,18 +1,14 @@
 using AppointmentService.Domain.ReadModels;
-using AppointmentService.Domain.Snapshorts;
 using BuildingBlocks.CQRS;
-using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.Appointments.Queries;
+namespace AppointmentService.Application.Appointments.Queries.AppointmentSelectIn6Months;
 
-public class AppointmentSelectIn6MonthsQuery : IQuery<AppointmentSelectIn6MonthsQueryResponse>
-{
-}
+
 
 /// <summary>
-/// AppointmentSelectIn6MonthsQueryHandler - Handles the retrieval of appointment counts for the last 6 months and today.
+/// AppointmentSelectIn6Months - Handles the retrieval of appointment counts for the last 6 months and today.
 /// </summary>
 public class AppointmentSelectIn6MonthsQueryHandler : IQueryHandler<AppointmentSelectIn6MonthsQuery, AppointmentSelectIn6MonthsQueryResponse>
 {
@@ -87,23 +83,4 @@ public class AppointmentSelectIn6MonthsQueryHandler : IQueryHandler<AppointmentS
         
         return response;
     }
-}
-
-public class AppointmentSelectIn6MonthsQueryResponse : AbstractResponse<AppointmentSelectIn6MonthsEntity>
-{
-    public override AppointmentSelectIn6MonthsEntity Response { get; set; } = null!;
-}
-
-public class AppointmentSelectIn6MonthsEntity
-{
-    public List<MonthlyAppointmentCount> MonthlyData { get; set; } = new();
-    public int TodayCount { get; set; }
-    public DateOnly TodayDate { get; set; }
-}
-
-public class MonthlyAppointmentCount
-{
-    public int Year { get; set; }
-    public int Month { get; set; }
-    public int Count { get; set; }
 }

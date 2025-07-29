@@ -1,4 +1,5 @@
 using AppointmentService.Application.CounselorSchedules.Commands;
+using AppointmentService.Application.CounselorSchedules.Commands.InsertCounselorSchedule;
 using AppointmentService.Domain.Snapshorts;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using MassTransit;

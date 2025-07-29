@@ -1,5 +1,12 @@
 using AppointmentService.Application.Appointments.Commands;
+using AppointmentService.Application.Appointments.Commands.InsertAppointment;
+using AppointmentService.Application.Appointments.Commands.PaymentCallback;
+using AppointmentService.Application.Appointments.Commands.UpdateAppointment;
 using AppointmentService.Application.Appointments.Queries;
+using AppointmentService.Application.Appointments.Queries.AppointmentSelectByUserId;
+using AppointmentService.Application.Appointments.Queries.AppointmentSelectIn6Months;
+using AppointmentService.Application.Appointments.Queries.AppointmentSelects;
+using AppointmentService.Application.Appointments.Queries.SelectAppointmentById;
 using Common;
 using Common.Utils.Const;
 using MediatR;

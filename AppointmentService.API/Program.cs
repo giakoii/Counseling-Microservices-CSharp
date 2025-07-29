@@ -1,8 +1,10 @@
 using System.Net;
 using System.Text.Json.Serialization;
 using AppointmentService.Application.CounselorSchedules.Commands;
+using AppointmentService.Application.CounselorSchedules.Commands.InsertCounselorSchedule;
 using AppointmentService.Application.CounselorSchedules.Consumers;
 using AppointmentService.Application.CounselorSchedules.Queries;
+using AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorSchedules;
 using AppointmentService.Application.PaymentServices;
 using AppointmentService.Domain.ReadModels;
 using AppointmentService.Domain.WriteModels;

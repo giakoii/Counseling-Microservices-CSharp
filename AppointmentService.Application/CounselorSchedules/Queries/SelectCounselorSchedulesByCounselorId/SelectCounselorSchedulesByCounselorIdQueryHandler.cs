@@ -1,3 +1,4 @@
+using AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorScheduleById;
 using AppointmentService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
 using Common;
@@ -5,15 +6,7 @@ using Common.Utils.Const;
 using Shared.Application.Interfaces;
 using Shared.Infrastructure.Helpers;
 
-namespace AppointmentService.Application.CounselorSchedules.Queries;
-
-public class SelectCounselorSchedulesByCounselorIdQuery : IQuery<SelectCounselorSchedulesByCounselorIdResponse>
-{
-    public Guid CounselorId { get; set; }
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
-}
-
+namespace AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorSchedulesByCounselorId;
 
 /// <summary>
 /// SelectCounselorSchedulesByCounselorIdQueryHandler - Handles the retrieval of counselor schedules by counselor ID.

@@ -1,24 +1,13 @@
-using System.Text.Json.Serialization;
+using AppointmentService.Application.Appointments.Commands.InsertAppointment;
 using AppointmentService.Application.PaymentServices;
 using AppointmentService.Domain.ReadModels;
 using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
-using Common;
 using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.Appointments.Commands;
-
-public record AppointmentPaymentCallbackCommand : ICommand<AppointmentInsertResponse>
-{
-    [JsonIgnore]
-    public Guid AppointmentId { get; set; }
-    
-    public string Code { get; set; } = null!;
-    
-    public bool Cancel { get; set; }
-}
+namespace AppointmentService.Application.Appointments.Commands.PaymentCallback;
 
 public class AppointmentPaymentCallbackCommandHandler : ICommandHandler<AppointmentPaymentCallbackCommand, AppointmentInsertResponse>
 {

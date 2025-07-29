@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using AppointmentService.Application.Appointments.Commands;
+using AppointmentService.Application.Appointments.Commands.InsertAppointment;
 using AppointmentService.Application.PaymentServices;
 using Common.Utils.Const;
 

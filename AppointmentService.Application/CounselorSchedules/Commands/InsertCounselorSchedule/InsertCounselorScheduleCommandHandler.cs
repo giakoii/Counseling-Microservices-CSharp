@@ -1,5 +1,4 @@
 using AppointmentService.Domain.ReadModels;
-using AppointmentService.Domain.Snapshorts;
 using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
@@ -7,13 +6,9 @@ using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.CounselorSchedules.Commands;
+namespace AppointmentService.Application.CounselorSchedules.Commands.InsertCounselorSchedule;
 
-public record InsertCounselorScheduleCommand(UserInformation Counselor)
-    : ICommand<BaseCommandResponse>;
-
-internal class InsertCounselorScheduleCommandHandler
-    : ICommandHandler<InsertCounselorScheduleCommand, BaseCommandResponse>
+public class InsertCounselorScheduleCommandHandler : ICommandHandler<InsertCounselorScheduleCommand, BaseCommandResponse>
 {
     private readonly ICommandRepository<CounselorScheduleDetail> _counselorScheduleRepository;
     private readonly ICommandRepository<Weekday> _weekdayRepository;

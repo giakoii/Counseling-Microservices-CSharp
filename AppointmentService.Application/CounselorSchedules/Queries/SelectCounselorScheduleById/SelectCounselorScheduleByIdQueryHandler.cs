@@ -1,16 +1,9 @@
 using AppointmentService.Domain.ReadModels;
-using AppointmentService.Domain.Snapshorts;
 using BuildingBlocks.CQRS;
-using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.CounselorSchedules.Queries;
-
-public class SelectCounselorScheduleByIdQuery : IQuery<SelectCounselorScheduleByIdResponse>
-{
-    public Guid ScheduleId { get; set; }
-}
+namespace AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorScheduleById;
 
 /// <summary>
 /// SelectCounselorScheduleByIdQueryHandler - Handles the retrieval of a single counselor schedule by ID.
@@ -75,26 +68,3 @@ public class SelectCounselorScheduleByIdQueryHandler : IQueryHandler<SelectCouns
     }
 }
 
-public class SelectCounselorScheduleByIdResponse : AbstractResponse<SelectCounselorScheduleByIdEntity>
-{
-    public override SelectCounselorScheduleByIdEntity Response { get; set; } = null!;
-}
-
-public class SelectCounselorScheduleByIdEntity
-{
-    public Guid ScheduleId { get; set; }
-    public Guid CounselorId { get; set; }
-    public string CounselorEmail { get; set; } = null!;
-    public string CounselorName { get; set; } = null!;
-    public int DayId { get; set; }
-    public int SlotId { get; set; }
-    public short StatusId { get; set; }
-    public string Day { get; set; } = null!;
-    public string Slot { get; set; } = null!;
-    public TimeOnly StartTime { get; set; }
-    public TimeOnly EndTime { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    
-    public UserInformation Counselor { get; set; } = null!;
-}

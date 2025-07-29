@@ -1,4 +1,6 @@
-using AppointmentService.Application.CounselorSchedules.Queries;
+using AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorScheduleById;
+using AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorSchedules;
+using AppointmentService.Application.CounselorSchedules.Queries.SelectCounselorSchedulesByCounselorId;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,8 +25,6 @@ public class CounselorScheduleController : ControllerBase
     /// <summary>
     /// Select all counselor schedules with pagination.
     /// </summary>
-    /// <param name="pageNumber">Page number (default: 1)</param>
-    /// <param name="pageSize">Page size (default: 10)</param>
     /// <returns></returns>
     [HttpGet]
     public async Task<IActionResult> SelectCounselorSchedulesAsync()

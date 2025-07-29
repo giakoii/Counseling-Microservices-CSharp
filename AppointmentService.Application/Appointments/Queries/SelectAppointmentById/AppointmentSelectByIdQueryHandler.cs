@@ -1,16 +1,12 @@
+using AppointmentService.Application.Appointments.Queries.AppointmentSelects;
 using AppointmentService.Domain.ReadModels;
-using AppointmentService.Domain.Snapshorts;
 using BuildingBlocks.CQRS;
-using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.Appointments.Queries;
+namespace AppointmentService.Application.Appointments.Queries.SelectAppointmentById;
 
-public class AppointmentSelectByIdQuery : IQuery<AppointmentSelectByIdQueryResponse>
-{
-    public Guid AppointmentId { get; set; }
-}
+
 
 /// <summary>
 /// AppointmentSelectByIdQueryHandler - Handles the retrieval of a single appointment by ID.
@@ -71,9 +67,4 @@ public class AppointmentSelectByIdQueryHandler : IQueryHandler<AppointmentSelect
         response.SetMessage(MessageId.I00001);
         return response;
     }
-}
-
-public class AppointmentSelectByIdQueryResponse : AbstractResponse<AppointmentSelectsQueryEntity>
-{
-    public override AppointmentSelectsQueryEntity Response { get; set; } = null!;
 }

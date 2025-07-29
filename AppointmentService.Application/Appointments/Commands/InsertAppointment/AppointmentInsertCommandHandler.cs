@@ -1,25 +1,14 @@
-using System.ComponentModel.DataAnnotations;
 using AppointmentService.Application.PaymentServices;
 using AppointmentService.Domain.ReadModels;
 using AppointmentService.Domain.Snapshorts;
 using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
-using Common;
 using Common.Utils.Const;
-using Shared.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.Appointments.Commands;
+namespace AppointmentService.Application.Appointments.Commands.InsertAppointment;
 
-public class AppointmentInsertCommand : ICommand<AppointmentInsertResponse>
-{
-    [Required(ErrorMessage = "ScheduleId is required.")]
-    public Guid ScheduleId { get; set; }
-    
-    [Required(ErrorMessage = "Content is required.")]
-    [MaxLength(500, ErrorMessage = "Content cannot exceed 500 characters.")]
-    public string Content { get; set; } = null!;
-} 
 
 /// <summary>
 /// AppointmentInsertCommandHandler - Handles the insertion of a new appointment.
@@ -154,20 +143,4 @@ public class AppointmentInsertCommandHandler : ICommandHandler<AppointmentInsert
         });
         return response;
     }
-}
-
-public class AppointmentInsertResponse : AbstractResponse<AppointmentInsertEntity>
-{
-    public override AppointmentInsertEntity Response { get; set; }
-    
-    public string AppointmentId { get; set; }
-    
-    public string TransactionId { get; set; }
-}
-
-public class AppointmentInsertEntity
-{
-    public string CheckoutUrl { get; set; }
-    
-    public string QrCode { get; set; }
 }

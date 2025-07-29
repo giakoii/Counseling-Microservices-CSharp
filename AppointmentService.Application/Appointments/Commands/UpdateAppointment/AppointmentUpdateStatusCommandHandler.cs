@@ -1,25 +1,14 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using AppointmentService.Domain.ReadModels;
 using AppointmentService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
-using Marten;
+using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
-namespace AppointmentService.Application.Appointments.Commands;
+namespace AppointmentService.Application.Appointments.Commands.UpdateAppointment;
 
-public record AppointmentUpdateStatusCommand : ICommand<BaseCommandResponse>
-{
-    [JsonIgnore]
-    [Required(ErrorMessage = "Appointment ID is required.")]
-    public Guid AppointmentId { get; set; }
-    
-    [Required(ErrorMessage = "Status is required.")]
-    [Range(3, 4, ErrorMessage = "Status must be between 3 and 4.")]
-    public short Status { get; set; }
-}
+
 
 /// <summary>
 /// AppointmentUpdateStatusCommandHandler - Handles the command to update the status of an appointment.
@@ -29,7 +18,6 @@ public class AppointmentUpdateStatusCommandHandler : ICommandHandler<Appointment
     private readonly ICommandRepository<Appointment> _commandRepository;
     private readonly INoSqlQueryRepository<AppointmentCollection> _appointmentRepository;
     private readonly IIdentityService _identityService;
-
     
     public AppointmentUpdateStatusCommandHandler(ICommandRepository<Appointment> commandRepository, INoSqlQueryRepository<AppointmentCollection> appointmentRepository, IIdentityService identityService)
     {
@@ -47,10 +35,17 @@ public class AppointmentUpdateStatusCommandHandler : ICommandHandler<Appointment
 
         // Retrieve the appointment
         var appointmentCollection = await _appointmentRepository.FindOneAsync(x => x.Id == request.AppointmentId && x.IsActive);
-        var appointment = await _commandRepository.Find(x => x.AppointmentId == request.AppointmentId && x.IsActive).FirstOrDefaultAsync(token: cancellationToken);
+        var appointment = await _commandRepository.Find(x => x.AppointmentId == request.AppointmentId && x.IsActive, includes: x=>x.Schedule.Slot).FirstOrDefaultAsync(cancellationToken: cancellationToken);
         if (appointment == null || appointmentCollection == null)
         {
             response.SetMessage(MessageId.I00000, "Appointment not found.");
+            return response;
+        }
+        
+        // Check the time of appointment to update
+        if (appointment.Schedule.Slot.StartTime > TimeOnly.FromDateTime(DateTime.UtcNow) && appointment.AppointmentDate > DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            response.SetMessage(MessageId.E00000, "Cannot update status for future appointments.");
             return response;
         }
 
@@ -58,8 +53,8 @@ public class AppointmentUpdateStatusCommandHandler : ICommandHandler<Appointment
         await _commandRepository.ExecuteInTransactionAsync(async () =>
         {
             // Update the status of the appointment
-            appointment.StatusId = request.Status;
-            appointmentCollection.Status = request.Status;
+            appointment.StatusId = (short) ConstantEnum.AppointmentStatus.Completed;
+            appointmentCollection.Status = (short) ConstantEnum.AppointmentStatus.Completed;
 
             // Save changes
             _commandRepository.Update(appointment);
