@@ -1,4 +1,3 @@
-using AuthService.Domain;
 using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
@@ -6,10 +5,7 @@ using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Commands;
-
-public record LoginUserCommand(string? Email, string? Password) : ICommand<LoginResponse>;
-
+namespace AuthService.Application.Users.Commands.LoginUser;
 internal class LoginUserCommandHandler : ICommandHandler<LoginUserCommand, LoginResponse>
 {
     private readonly ICommandRepository<User> _userRepository;

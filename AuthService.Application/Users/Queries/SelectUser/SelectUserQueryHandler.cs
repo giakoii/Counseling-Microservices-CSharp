@@ -1,17 +1,12 @@
-using System.ComponentModel.DataAnnotations;
+using AuthService.Application.Users.Queries.SelectUserProfile;
 using AuthService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Queries;
+namespace AuthService.Application.Users.Queries.SelectUser;
 
-public record SelectUserQuery : IQuery<SelectUserResponse>
-{
-    [Required(ErrorMessage = "UserId is required.")]
-    public Guid UserId { get; set; }
-}
 
 /// <summary>
 /// SelectUserQueryHandler - Handles the selection of a user profile by UserId.

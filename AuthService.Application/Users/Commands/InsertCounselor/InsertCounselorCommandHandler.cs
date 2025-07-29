@@ -9,14 +9,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Commands;
-
-public record InsertCounselorCommand(
-    string Email,
-    string FirstName,
-    string LastName
-) : ICommand<BaseCommandResponse>;
-
+namespace AuthService.Application.Users.Commands.InsertCounselor;
 public class InsertCounselorCommandHandler : ICommandHandler<InsertCounselorCommand, BaseCommandResponse>
 {
     private readonly ICommandRepository<User> _userRepository;

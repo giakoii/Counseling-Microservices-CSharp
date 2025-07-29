@@ -1,20 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
 using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Commands;
-
-public record UpdatePasswordCommand : ICommand<BaseCommandResponse>
-{
-    [Required(ErrorMessage = "Old password is required")]
-    public string OldPassword { get; set; } = null!;
-    
-    [Required(ErrorMessage = "New password is required")]
-    public string NewPassword { get; set; } = null!;
-}
+namespace AuthService.Application.Users.Commands.UpdatePassword;
 
 /// <summary>
 /// UpdatePasswordCommandHandler - Handles the command to update a user's password.

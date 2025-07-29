@@ -6,14 +6,7 @@ using Common.Utils.Const;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Commands;
-
-public record InsertUserCommand (
-    string Email,
-    string Password,
-    string FirstName,
-    string LastName
-) : ICommand<BaseCommandResponse>;
+namespace AuthService.Application.Users.Commands.InsertUser;
 
 internal class InsertUserCommandHandler : ICommandHandler<InsertUserCommand, BaseCommandResponse>
 {

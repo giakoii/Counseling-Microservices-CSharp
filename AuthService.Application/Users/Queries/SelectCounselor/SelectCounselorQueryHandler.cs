@@ -4,9 +4,7 @@ using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Queries;
-
-public record SelectCounselorQuery() : IQuery<SelectCounselorInformationResponse>;
+namespace AuthService.Application.Users.Queries.SelectCounselor;
 
 public class SelectCounselorQueryHandler : IQueryHandler<SelectCounselorQuery, SelectCounselorInformationResponse>
 {

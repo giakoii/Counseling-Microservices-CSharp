@@ -1,3 +1,4 @@
+using AuthService.Application.Users.Queries.SelectCounselor;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using MassTransit;
 using MediatR;
@@ -15,7 +16,7 @@ public class SelectCounselorEventConsumer : IConsumer<SelectCounselorScheduleEve
 
     public async Task Consume(ConsumeContext<SelectCounselorScheduleEvent> context)
     {
-        var result = await _mediator.Send(new AuthService.Application.Users.Queries.SelectCounselorQuery());
+        var result = await _mediator.Send(new SelectCounselorQuery());
         
         if (result.Success)
         {

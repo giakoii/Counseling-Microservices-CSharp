@@ -1,7 +1,16 @@
 using System.Security.Claims;
 using AuthService.API.Helpers;
 using AuthService.Application.Users.Commands;
+using AuthService.Application.Users.Commands.InsertCounselor;
+using AuthService.Application.Users.Commands.InsertUser;
+using AuthService.Application.Users.Commands.LoginUser;
+using AuthService.Application.Users.Commands.UpdatePassword;
+using AuthService.Application.Users.Commands.UpdateUser;
 using AuthService.Application.Users.Queries;
+using AuthService.Application.Users.Queries.SelectCounselorWithPaging;
+using AuthService.Application.Users.Queries.SelectToken;
+using AuthService.Application.Users.Queries.SelectUser;
+using AuthService.Application.Users.Queries.SelectUserProfile;
 using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common;
 using Common.Utils.Const;

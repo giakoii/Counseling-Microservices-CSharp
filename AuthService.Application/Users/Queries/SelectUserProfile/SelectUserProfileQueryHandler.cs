@@ -4,9 +4,7 @@ using Common;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 
-namespace AuthService.Application.Users.Queries;
-
-public record SelectUserProfileQuery(Guid UserId) : IQuery<SelectUserProfileResponse>;
+namespace AuthService.Application.Users.Queries.SelectUserProfile;
 
 public class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQuery, SelectUserProfileResponse>
 {
@@ -46,30 +44,4 @@ public class SelectUserProfileQueryHandler : IQueryHandler<SelectUserProfileQuer
         response.SetMessage(MessageId.I00001);
         return response;
     }
-}
-
-public class  SelectUserProfileResponse : AbstractResponse<SelectUserProfileEntity>
-{
-    public override SelectUserProfileEntity Response { get; set; }
-}
-
-public class SelectUserProfileEntity
-{
-    public Guid UserId { get; set; }
-
-    public string Email { get; set; } = null!;
-
-    public string? PhoneNumber { get; set; }
-
-    public string FirstName { get; set; } = null!;
-
-    public string LastName { get; set; } = null!;
-
-    public DateTime? DateOfBirth { get; set; }
-
-    public byte? Gender { get; set; }
-
-    public string? Address { get; set; }
-
-    public string? AvatarUrl { get; set; }
 }

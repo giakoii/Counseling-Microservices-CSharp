@@ -1,17 +1,10 @@
 using AuthService.Domain.ReadModels;
 using BuildingBlocks.CQRS;
-using BuildingBlocks.Messaging.Events.CounselorScheduleEvents;
 using Common.Utils.Const;
 using Shared.Application.Interfaces;
 using Shared.Infrastructure.Helpers;
 
-namespace AuthService.Application.Users.Queries;
-
-public record SelectCounselorWithPagingQuery : IQuery<SelectCounselorWithPagingResponse>
-{
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
-}
+namespace AuthService.Application.Users.Queries.SelectCounselorWithPaging;
 
 public class SelectCounselorWithPagingQueryHandler : IQueryHandler<SelectCounselorWithPagingQuery, SelectCounselorWithPagingResponse>
 {
@@ -61,22 +54,3 @@ public class SelectCounselorWithPagingQueryHandler : IQueryHandler<SelectCounsel
     }
 }
 
-public class SelectCounselorWithPagingResponse
-{
-    public bool Success { get; set; }
-    
-    public string Message { get; set; } = null!;
-    
-    public PagedResult<CounselorWithId> Response { get; set; } = new();
-}
-
-public class CounselorWithId
-{
-    public Guid Id { get; set; }
-    
-    public string Email { get; set; } = null!;
-    
-    public string FirstName { get; set; } = null!;
-    
-    public string LastName { get; set; } = null!;
-}

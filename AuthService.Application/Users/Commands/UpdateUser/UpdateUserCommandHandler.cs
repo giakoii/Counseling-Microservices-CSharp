@@ -1,4 +1,5 @@
 using AuthService.Application.Services;
+using AuthService.Application.Users.Commands.UpdateUser;
 using AuthService.Domain.ReadModels;
 using AuthService.Domain.WriteModels;
 using BuildingBlocks.CQRS;
@@ -9,26 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Interfaces;
 
 namespace AuthService.Application.Users.Commands;
-
-public record UpdateUserCommand : ICommand<BaseCommandResponse>
-{
-    public string? Email { get; set; } = null!;
-
-    public string? PhoneNumber { get; set; }
-    
-    public string? FirstName { get; set; } = null!;
-    
-    public string? LastName { get; set; } = null!;
-
-    public DateTime? DateOfBirth { get; set; }
-
-    public byte? Gender { get; set; }
-
-    public string? Address { get; set; }
-
-    public IFormFile? AvatarFile { get; set; }
-}
-
 public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, BaseCommandResponse>
 {
     private readonly ICommandRepository<User> _userRepository;
