@@ -11,7 +11,6 @@ namespace AppointmentService.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/counselor-schedule")]
-[Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 public class CounselorScheduleController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -46,6 +45,7 @@ public class CounselorScheduleController : ControllerBase
     /// <param name="id">Schedule ID</param>
     /// <returns></returns>
     [HttpGet("{id}")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SelectCounselorScheduleByIdAsync([FromRoute] Guid id)
     {
         var query = new SelectCounselorScheduleByIdQuery
@@ -70,6 +70,7 @@ public class CounselorScheduleController : ControllerBase
     /// <param name="pageSize">Page size (default: 10)</param>
     /// <returns></returns>
     [HttpGet("counselor/{counselorId}")]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SelectCounselorSchedulesByCounselorIdAsync([FromRoute] Guid counselorId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var query = new SelectCounselorSchedulesByCounselorIdQuery
